@@ -4,5 +4,5 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Signal.io Example' });
+  res.render('index', { title: 'Signal.io Example', host: ChatApp.host });
 };

@@ -23,7 +23,8 @@ chatApp.controller('chatCtrl', function($scope, Comment) {
   //
   // Connect a socket to ther server
   //
-  var socket = io.connect('http://localhost:3000');
+  console.log('environment.host: ' + environment.host);
+  var socket = io.connect(environment.host);
   
   //
   // If we get a response, let's add it to the comments list

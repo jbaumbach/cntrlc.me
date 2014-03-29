@@ -5,14 +5,13 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3010);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(express.favicon());
@@ -22,10 +21,16 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+ChatApp = {
+  host: 'notset'
+}
+
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
+  ChatApp.host = 'http://localhost:' + app.get('port');
 }
+
 
 //
 // Repository for all our comments
