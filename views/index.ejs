@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="chatApp">
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    
+    <script src="/socket.io/socket.io.js"></script>
   </head>
 
 
   <body>
+  
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -31,18 +32,20 @@
       </div>
     </div>
   
-    <div class="container">
+    <div class="container" ng-controller="chatCtrl">
+      
       <h1>Your Comment</h1>
       <form role="form">
         <div class="form-group">
-          <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter comments">
+          <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter comments" ng-model="comment">
         </div>
-        <button type="submit" class="btn btn-default">Submit</button>
+        <button type="submit" class="btn btn-default" ng-click="submitComment()">Submit</button>
       </form>
       
+      
       <h1>All Comments</h1>
-      <ul>
-        <li>This is comment #1</li>
+      <ul ng-cloak>
+        <li ng-repeat="comment in comments">{{ comment.text }}</li>
       </ul>
 
       
@@ -53,9 +56,10 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular-resource.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.min.js"></script>
-  </body>
+    <script src="/javascripts/ng-chat-app.js"></script>
   </body>
 
 </html>

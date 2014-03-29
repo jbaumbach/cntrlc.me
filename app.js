@@ -27,20 +27,41 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+//
+// Repository for all our comments
+//
+var comments = [];
+
 app.get('/', routes.index);
-app.get('/users', user.list);
+
+//
+// Support for getting server comments on initial page load
+//
+app.get('/api/v1/comments', function(req, res) {
+  res.send(200, comments);
+})
 
 var server = http.createServer(app);
 
+//
+// Start the socket.io server
+//
 var io = require('socket.io').listen(server);
   
+//
+// Main site
+//
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+//
+// Socket listener.  Gets messages from the clients and rebroadcasts them
+// to all the other clients.
+//
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
+  socket.on('addComment', function (data) {
+    comments.push(data);
+    socket.broadcast.emit('addedComment', data);
   });
 });
