@@ -3,12 +3,12 @@
  * Module dependencies.
  */
 
-var express = require('express');
-var routes = require('./routes');
-var http = require('http');
-var path = require('path');
-
-var app = express();
+var express = require('express')
+  , routes = require('./routes')
+  , http = require('http')
+  , path = require('path')
+  , app = express()
+  ;
 
 // all environments
 app.set('port', process.env.PORT || 3010);
@@ -42,7 +42,8 @@ if ('staging' == app.get('env')) {
 
 
 //
-// Repository for all our comments
+// Repository for all our comments.  Only suitable for development!  Does not
+// take into consideration persistence or multiple servers.
 //
 var comments = [];
 
@@ -61,7 +62,15 @@ var server = http.createServer(app);
 // Start the socket.io server
 //
 var io = require('socket.io').listen(server);
-  
+
+/*
+// assuming io is the Socket.IO server object
+io.configure(function () {
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
+});
+*/
+
 //
 // Main site
 //
