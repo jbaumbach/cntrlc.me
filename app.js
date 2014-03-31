@@ -63,14 +63,6 @@ var server = http.createServer(app);
 //
 var io = require('socket.io').listen(server);
 
-/*
-// assuming io is the Socket.IO server object
-io.configure(function () {
-  io.set("transports", ["xhr-polling"]);
-  io.set("polling duration", 10);
-});
-*/
-
 //
 // Main site
 //
