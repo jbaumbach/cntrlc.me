@@ -37,7 +37,7 @@ if ('development' == app.get('env')) {
 // staging only
 if ('staging' == app.get('env')) {
   app.use(express.errorHandler());
-  ChatApp.host = 'http://http://socketio-chat.herokuapp.com';
+  ChatApp.host = 'http://socketio-chat.herokuapp.com';
 }
 
 
