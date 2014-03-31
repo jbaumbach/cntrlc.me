@@ -21,6 +21,9 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+//
+// Global namespace
+//
 ChatApp = {
   host: 'notset'
 }
@@ -29,6 +32,12 @@ ChatApp = {
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
   ChatApp.host = 'http://localhost:' + app.get('port');
+}
+
+// staging only
+if ('staging' == app.get('env')) {
+  app.use(express.errorHandler());
+  ChatApp.host = 'http://http://socketio-chat.herokuapp.com';
 }
 
 
