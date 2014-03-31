@@ -11,7 +11,7 @@ chatApp.factory('Comment', ['$resource', function($resource) {
 chatApp.controller('chatCtrl', function($scope, Comment) {
 
   //
-  // Get current comments from the server
+  // Get current comments from the server on initial page load
   //
   var serverComments = Comment.query(function success() {
     $scope.comments = serverComments;
@@ -21,7 +21,7 @@ chatApp.controller('chatCtrl', function($scope, Comment) {
   
 
   //
-  // Connect a socket to ther server
+  // Connect a socket to the server
   //
   console.log('environment.host: ' + environment.host);
   var socket = io.connect(environment.host);
@@ -42,7 +42,7 @@ chatApp.controller('chatCtrl', function($scope, Comment) {
   //
   $scope.submitComment = function() {
     // 
-    // Build data packet to send to the server
+    // Build data packet to send to the server.  This defines the app's objects!
     //
     var data = { text: $scope.comment };
     
