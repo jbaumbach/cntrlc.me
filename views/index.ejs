@@ -49,7 +49,7 @@
       
       
       <h1>All Comments</h1>
-      <p ng-hide="comments">No comments yet!</p>
+      <p ng-cloak ng-show="comments.length === 0">No comments yet!</p>
       <ul ng-cloak>
         <li ng-repeat="comment in comments">{{ comment.text }}</li>
       </ul>

@@ -10,6 +10,8 @@ chatApp.factory('Comment', ['$resource', function($resource) {
 
 chatApp.controller('chatCtrl', function($scope, Comment) {
 
+  $scope.comments = [];
+  
   //
   // Get current comments from the server on initial page load
   //
@@ -58,4 +60,4 @@ chatApp.controller('chatCtrl', function($scope, Comment) {
     $scope.comment = '';
 
   }
-})
+});
