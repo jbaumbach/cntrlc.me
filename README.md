@@ -1,6 +1,7 @@
 socketio-chat
 =============
 
-Demo of Socket IO Chat app running on Heroku.
+Demo of Socket IO Chat app running on Heroku.  Load the page on two or more computers and everyone's messages should
+be appear in the chat area.
 
-More info to follow.
+Live demo: [http://socketio-chat.herokuapp.com/](http://socketio-chat.herokuapp.com/)
