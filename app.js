@@ -62,8 +62,8 @@ app.get('/', routes.index);
 // Support for getting server comments on initial page load
 //
 app.get('/api/v1/comments', function(req, res) {
-  res.send(200, comments);
-})
+  res.status(200).send(comments);
+});
 
 var server = http.createServer(app);
 
