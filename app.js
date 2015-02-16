@@ -8,17 +8,21 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , app = express()
+  , favicon = require('serve-favicon')
+  , morgan = require('morgan')
+  , bodyParser = require('body-parser')
+  , errorhandler = require('errorhandler')
   ;
 
 // all environments
 app.set('port', process.env.PORT || 3010);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
-app.use(express.favicon());
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
+
+//app.use(favicon(__dirname + '/public/favicon.ico'));  // todo: create icon
+
+app.use(morgan('dev'));
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //
@@ -30,13 +34,18 @@ ChatApp = {
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+  app.use(errorhandler());
   ChatApp.host = 'http://localhost:' + app.get('port');
 }
 
 // staging only
 if ('staging' == app.get('env')) {
-  app.use(express.errorHandler());
+  app.use(errorhandler());
+  ChatApp.host = 'http://socketio-chat.herokuapp.com';
+}
+
+// production
+if ('production' == app.get('env')) {
   ChatApp.host = 'http://socketio-chat.herokuapp.com';
 }
 
