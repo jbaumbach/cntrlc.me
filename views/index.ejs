@@ -8,14 +8,18 @@
     
     <script>
       var environment = {
-        host: "<%= host %>"
+        host: "<%= locals.host %>",
+        FBAppId: "<%= locals.FBAppId %>"
       }
     </script>
     <!-- Make responsive on iPhone/mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   </head>
 
-  <body>
+  <body ng-controller="chatCtrl">
+    <script>
+    </script>
+    
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -36,24 +40,40 @@
         </div><!--/.nav-collapse -->
       </div>
     </div>
-  
-    <div class="container" ng-controller="chatCtrl">
-      
-      <h1>Your Comment</h1>
-      <form role="form">
-        <div class="form-group">
-          <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter comments" ng-model="comment">
-        </div>
-        <button type="submit" class="btn btn-default" ng-click="submitComment()">Submit</button>
-      </form>
-      
-      
-      <h1>All Comments</h1>
-      <p ng-cloak ng-show="comments.length === 0">No comments yet!</p>
-      <ul ng-cloak>
-        <li ng-repeat="comment in comments">{{ comment.text }}</li>
-      </ul>
 
+    <div class="container">
+
+      <div ng-cloak ng-show="checkingLoggedIn">
+        <h2>Checking login...</h2>
+      </div>
+      
+      <div ng-cloak ng-hide="isLoggedIn || checkingLoggedIn">
+        <h1>Login to access your personal clipboard.</h1>
+        <aside>For login only - we'll never post anything on your behalf, nor save your public data.</aside>
+        <div id="fb-root"></div>
+        <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+        </fb:login-button>
+
+        <div id="status">
+        </div>
+      </div>
+
+      <div ng-cloak ng-show="isLoggedIn">
+        <p></p>
+        <form role="form">
+          <div class="form-group">
+            <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter comment" ng-model="comment">
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="submitComment()">Submit</button>
+        </form>
+
+
+        <h1>{{ user.first_name }}'s Comments</h1>
+        <p ng-cloak ng-show="comments.length === 0">No comments yet!</p>
+        <ul ng-cloak>
+          <li ng-repeat="comment in comments">{{ comment.text }}</li>
+        </ul>
+      </div>
       
     </div><!-- /.container -->
   
