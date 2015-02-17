@@ -31,3 +31,5 @@ studio-html-templates.js
 tags
 
 data/testdbci.*.gz
+
+config/*.json

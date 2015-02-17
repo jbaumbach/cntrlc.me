@@ -12,6 +12,7 @@ var express = require('express')
   , morgan = require('morgan')
   , bodyParser = require('body-parser')
   , errorhandler = require('errorhandler')
+  , config = require(process.cwd() + '/config/config')
   ;
 
 // all environments

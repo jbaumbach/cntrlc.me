@@ -1,0 +1,9 @@
+To generate a config file, run the command:
+
+$ node scripts/generate-config-file.js
+
+Most likely it'll create a development.json file in this directory.  Edit that file and add your specific values.
+
+Also, you should copy that file to "production.json" and/or "staging.json" (whatever your process.env.NODE_ENV) value is.
+Then those values will be used when you deploy to those environments.
+
