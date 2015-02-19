@@ -8,19 +8,34 @@ chatApp.factory('Comment', ['$resource', function($resource) {
   return $resource('/api/v1/comments');
 }]);
 
-chatApp.factory('User', function() {
+chatApp.factory('User', ['$http', function($http) {
+  var sessionId;
   return {
     FBAuthResponse: null,
-    info: null
+    info: null,
+    login: function(callback) {
+      console.log('this: ', this);
+
+      $http.post(environment.host + '/loginfb', {
+        FBAuthResponse: this.FBAuthResponse,
+        info: this.info
+      }).
+        success(function(data, status, headers, config) {
+          console.log('good: ', data, status);
+          callback();
+        }).
+        error(function(data, status, headers, config) {
+          console.log('error: ', data, status);
+          callback('some error! ');
+        });
+    }
   };
-});
+}]);
 
 
 
-chatApp.run(['$rootScope', '$window', 'User',
-  function($rootScope, $window, User) {
-
-    //$rootScope.user = {};
+chatApp.run(['$rootScope', '$window', 'User', '$http',
+  function($rootScope, $window, User, $http) {
 
     User.checkingLoggedIn = true;
 
@@ -113,10 +128,23 @@ chatApp.run(['$rootScope', '$window', 'User',
         document.getElementById('status').innerHTML =
           'Thanks for logging in, ' + response.name + '!';
 
+        
+        
+        
         $rootScope.$apply(function() {
           User.info = response;
           console.log('Got user info!: ', User);
+          
+          User.login(function(err) {
+            if (err) {
+              console.log('got error! ', err);
+            } else {
+              console.log('good login!');
+            }
+          })
         });
+        
+        
         
       });
     }
