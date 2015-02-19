@@ -1,4 +1,5 @@
 var nconf = require('nconf')
+  fs = require('fs')
   ;
 
 //
@@ -12,6 +13,11 @@ process.env.NODE_ENV = (process.env.NODE_ENV || "development");
 GLOBAL.SocketIO = { Config:nconf };
 
 var configFName = process.cwd() + '/config/' + process.env.NODE_ENV + '.json';
+
+if (!fs.existsSync(configFName)) {
+  throw new Error('Missing config file: ' + configFName + '  Consider running /scripts/generate-config-file.js');
+}
+
 console.log('(info) using config file: ' + configFName);
 GLOBAL.SocketIO.Config.argv()
   .env()
