@@ -6,6 +6,8 @@ var
 
 var configFName = process.cwd() + '/config/' + process.env.NODE_ENV + '.json';
 
+console.log('=]  Add additional items with command line params.  ex. --foo bar  [=');
+console.log('=]   ** This file should not be checked into any public repos **   [=');
 console.log('(info) maintaining file: ' + configFName);
 
 if (!fs.existsSync(configFName)) {
