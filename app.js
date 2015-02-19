@@ -13,6 +13,7 @@ var express = require('express')
   , bodyParser = require('body-parser')
   , errorhandler = require('errorhandler')
   , config = require(process.cwd() + '/config/config')
+  , authorizationController = require(process.cwd() + '/routes/authorization')
   ;
 
 // all environments
@@ -58,6 +59,7 @@ if ('production' == app.get('env')) {
 var comments = [];
 
 app.get('/', routes.index);
+app.post('/loginfb', authorizationController.loginFb);
 
 //
 // Support for getting server comments on initial page load
@@ -85,6 +87,10 @@ server.listen(app.get('port'), function(){
 // to all the other clients.
 //
 io.sockets.on('connection', function (socket) {
+  
+  // todo: use a unique id as a "room" to join
+  // see: http://socket.io/docs/rooms-and-namespaces/
+  
   socket.on('addComment', function (data) {
     comments.push(data);
     socket.broadcast.emit('addedComment', data);
