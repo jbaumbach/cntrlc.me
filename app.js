@@ -14,6 +14,7 @@ var express = require('express')
   , errorhandler = require('errorhandler')
   , config = require(process.cwd() + '/config/config')
   , authorizationController = require(process.cwd() + '/routes/authorization')
+  , async = require('async')
   ;
 
 // all environments
@@ -75,24 +76,47 @@ var server = http.createServer(app);
 //
 var io = require('socket.io').listen(server);
 
-//
-// Main site
-//
-server.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+
+async.parallel({
+  db: function(cb) {
+    console.log('todo: connect to redis');
+    cb();
+  },
+  server: function(cb) {
+    //
+    // Main site
+    //
+    server.listen(app.get('port'), function(){
+      console.log('Express server listening on port ' + app.get('port'));
+      cb();
+    });
+  },
+  sockets: function(cb) {
+    //
+    // Socket listener.  Gets messages from the clients and rebroadcasts them
+    // to all the other clients.
+    //
+    io.sockets.on('connection', function (socket) {
+
+      // todo: use a unique id as a "room" to join
+      // see: http://socket.io/docs/rooms-and-namespaces/
+
+      socket.on('addComment', function (data) {
+        comments.push(data);
+        socket.broadcast.emit('addedComment', data);
+      });
+      
+    });
+    
+    cb();
+  }
+}, function(err, results) {
+  if (err) {
+    console.log('error starting up: ' + util.inspect(err));    
+  } else {
+    console.log('** all systems go! **');
+  }
 });
 
-//
-// Socket listener.  Gets messages from the clients and rebroadcasts them
-// to all the other clients.
-//
-io.sockets.on('connection', function (socket) {
-  
-  // todo: use a unique id as a "room" to join
-  // see: http://socket.io/docs/rooms-and-namespaces/
-  
-  socket.on('addComment', function (data) {
-    comments.push(data);
-    socket.broadcast.emit('addedComment', data);
-  });
-});
+
+
