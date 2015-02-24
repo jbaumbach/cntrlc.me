@@ -1,6 +1,8 @@
 var async = require('async')
-  util = require('util')
-  ;
+  , util = require('util')
+  , tinyHttp = require(process.cwd() + '/lib/tinyHttp')
+  , async = require('async')
+;  
 
 //
 // Here's what a sample response from FB looks like
@@ -62,7 +64,9 @@ exports.loginFb = function(req, res) {
    the "input_token" is FBAuthResponse.accessToken
    the "app-token" is this:
    
-   "There is another method to make calls to the Graph API that doesn't require using a generated app token. You can just pass your app id and app secret as the access_token parameter when you make a call:
+   "There is another method to make calls to the Graph API that doesn't require using a generated app 
+   token. You can just pass your app id and app secret as the access_token parameter when you make a 
+   call":
 
    http://graph.facebook.com/endpoint?key=value&access_token=app_id|app_secret"
    
@@ -82,6 +86,62 @@ exports.loginFb = function(req, res) {
 
   */
   
+  async.waterfall([
+    function confirmIdentity(cb) {
+      var options = {
+        secure: true,
+        url: 'https://graph.facebook.com/debug_token?input_token=' + req.body.FBAuthResponse.accessToken +
+          '&access_token=' + GLOBAL.SocketIO.Config.get('Facebook:app_id') + 
+          '|' + GLOBAL.SocketIO.Config.get('Facebook:app_secret'),
+        method: 'GET'
+      };
+      
+      console.log('going to use options: ' + util.inspect(options));
+      
+      tinyHttp.executeCall(options, function(err, result) {
+        if (err) {
+          cb({status: 502, msg: 'Unable to validate FB access token'});
+        } else {
+          console.log('got result: ' + util.inspect(result));
+          
+          if (req.body.FBAuthResponse.userID === result.data.user_id) {
+            cb();
+          } else {
+            cb({status: 422, msg: 'FB token does not match user info'});
+          }
+        }
+
+        //{
+        //  data: {
+        //    app_id: '592373607574396',
+        //      application: 'Socketio Chat - LocalDev',
+        //      expires_at: 1424761200,
+        //      is_valid: true,
+        //      scopes: [
+        //      'public_profile',
+        //      'email'
+        //    ],
+        //      user_id: '10204941785718115'
+        //  }
+        //}
+        
+        cb();
+      });
+    },
+    function getRedisSession(cb) {
+      
+      todo: make this work! - connect to redis in app.js
+        
+      cb();
+    }
+  ], function(err, result) {
+    if (err) {
+      console.log('got err: ' + util.inspect(err));
+    } else {
+      console.log('got result: ' + util.inspect(result));
+    }
+
+    res.status(500).send('not implemented!');
+  })
   
-  res.status(500).send('not implemented!');
-}
+};
