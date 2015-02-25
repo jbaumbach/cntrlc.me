@@ -2,6 +2,8 @@ var async = require('async')
   , util = require('util')
   , tinyHttp = require(process.cwd() + '/lib/tinyHttp')
   , async = require('async')
+  , redis = require(process.cwd() + '/lib/redis')
+  , globalFunctions = require(process.cwd() + '/lib/global-functions')
 ;  
 
 //
@@ -30,8 +32,9 @@ var sampleFBBody = {
 }
 
 exports.loginFb = function(req, res) {
-  console.log('got data: ' + util.inspect(req.body));
-  
+  console.log('got body data: ' + util.inspect(req.body));
+  var userId = 'user:fbid:' + req.body.info.id;
+
   /*
 
    Redis schema:
@@ -96,7 +99,7 @@ exports.loginFb = function(req, res) {
         method: 'GET'
       };
       
-      console.log('going to use options: ' + util.inspect(options));
+      console.log('calling FB, going to use options: ' + util.inspect(options));
       
       tinyHttp.executeCall(options, function(err, result) {
         if (err) {
@@ -125,23 +128,58 @@ exports.loginFb = function(req, res) {
         //  }
         //}
         
-        cb();
       });
     },
     function getRedisSession(cb) {
       
-      todo: make this work! - connect to redis in app.js
-        
-      cb();
+      var client = redis.getClient();
+      
+      async.waterfall([
+        function upsertUser(cb) {
+          console.log('have user id: ' + userId + ', inserting user record');
+          client.hmset(userId, req.body.info, function(err) {
+            cb(err);
+          });
+        },
+        function upsertSession(cb) {
+          //"UserSession" - Redis Key/Value (set/get) with key = global_user_id and value = session id from previous step.  Expiry?
+          //"SessionUser" - Redis Key/Value (set/get) with key = new GUID and value = global_user_id.  Expiry?
+
+          var userSessionKey = 'usersession:' + userId;
+          console.log('looking up userSessionKey: ' + userSessionKey);
+          client.get(userSessionKey, function(err, response) {
+            if (response) {
+              console.log('found session, returning session id: ' + response);
+              cb(null, response);
+            } else {
+              var sessionId = globalFunctions.generateUUID(); 
+              console.log('no session, setting one to: ' + sessionId);
+              client.set(userSessionKey, sessionId, function(err) {
+                console.log('cb: ' + cb + ', err: ' + err + ', sessionId: ' + sessionId);
+                cb(err, sessionId);
+              });
+            }
+          });
+          
+        },
+        function setSessionUser(sessionId, cb) {
+          var sessionUserKey = 'sessionuser:' + sessionId;
+          console.log('setting sessionUserKey: ' + sessionUserKey);
+          client.set(sessionUserKey, req.body.info.id, function(err) {
+            cb(err, sessionId);
+          });
+        }
+      ], cb);
     }
   ], function(err, result) {
     if (err) {
       console.log('got err: ' + util.inspect(err));
+      res.status(500).send({msg: util.inspect(err)});
     } else {
-      console.log('got result: ' + util.inspect(result));
+      console.log('done with everything, returning session id: ' + util.inspect(result));
+      res.status(200).send({sessionId: result});
     }
 
-    res.status(500).send('not implemented!');
   })
   
 };
