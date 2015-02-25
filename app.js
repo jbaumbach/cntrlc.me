@@ -15,7 +15,9 @@ var express = require('express')
   , config = require(process.cwd() + '/config/config')
   , authorizationController = require(process.cwd() + '/routes/authorization')
   , async = require('async')
-  ;
+  , util = require('util')
+  , redis = require(process.cwd() + '/lib/redis')
+;
 
 // all environments
 app.set('port', process.env.PORT || 3010);
@@ -79,15 +81,14 @@ var io = require('socket.io').listen(server);
 
 async.parallel({
   db: function(cb) {
-    console.log('todo: connect to redis');
-    cb();
+    redis.connectToRedis(cb);
   },
   server: function(cb) {
     //
     // Main site
     //
     server.listen(app.get('port'), function(){
-      console.log('Express server listening on port ' + app.get('port'));
+      console.log('(info) Express server listening on port ' + app.get('port'));
       cb();
     });
   },
@@ -114,7 +115,9 @@ async.parallel({
   if (err) {
     console.log('error starting up: ' + util.inspect(err));    
   } else {
+    console.log('*********************');
     console.log('** all systems go! **');
+    console.log('*********************');
   }
 });
 
