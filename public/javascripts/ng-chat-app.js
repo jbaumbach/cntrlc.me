@@ -1,5 +1,6 @@
 
 var chatApp = angular.module('chatApp', ['ngResource']);
+var checkLoginState;
 
 //
 // Resource to load comments from the server
@@ -31,8 +32,6 @@ chatApp.factory('User', ['$http', function($http) {
     }
   };
 }]);
-
-
 
 chatApp.run(['$rootScope', '$window', 'User', '$http',
   function($rootScope, $window, User, $http) {
@@ -76,7 +75,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
     // This function is called when someone finishes with the Login
     // Button.  See the onlogin handler attached to it in the sample
     // code below.
-    function checkLoginState() {
+    checkLoginState = function() {
       FB.getLoginStatus(function(response) {
         statusChangeCallback(response);
       });
