@@ -1,6 +1,6 @@
 
 var chatApp = angular.module('chatApp', ['ngResource']);
-var checkLoginState;
+var checkLoginState;      // Required by FB SDK - ensure it's in scope at all times
 
 //
 // Resource to load comments from the server
@@ -10,7 +10,6 @@ chatApp.factory('Comment', ['$resource', function($resource) {
 }]);
 
 chatApp.factory('User', ['$http', function($http) {
-  var sessionId;
   return {
     FBAuthResponse: null,
     info: null,
@@ -22,8 +21,14 @@ chatApp.factory('User', ['$http', function($http) {
         info: this.info
       }).
         success(function(data, status, headers, config) {
-          console.log('good: ', data, status);
-          callback();
+          console.log('good login, setting Bearer header: ', data, status);
+          
+          //
+          // Set session ID in $http headers for all future requests
+          //
+          $http.defaults.headers.common.Authorization = 'Bearer ' + data.sessionId;
+
+          callback(null, data.sessionId);
         }).
         error(function(data, status, headers, config) {
           console.log('error: ', data, status);
@@ -105,8 +110,6 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
       FB.getLoginStatus(function(response) {
         statusChangeCallback(response);
       });
-
-
     };
 
     // Load the SDK asynchronously
@@ -123,90 +126,91 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
     function testAPI() {
       console.log('Welcome!  Fetching your information.... ');
       FB.api('/me', function(response) {
-        console.log('Successful login for: ' + response.name);
-        console.log('got response: ', response);
-        
-        
-        $rootScope.$apply(function() {
-          User.info = response;
-          console.log('Got user info!: ', User);
-          
-          User.login(function(err) {
-            if (err) {
-              console.log('got error! ', err);
-            } else {
-              console.log('good login!');
-            }
-          })
-        });
-        
-        
-        
+        console.log('Successful FB response for: ' + response.name);
+
+        User.info = response;
+        console.log('Got user info!: ', User);
+
+        User.login(function(err, sessionId) {
+          if (err) {
+            console.log('got error! ', err);
+          } else {
+            User.sessionId = sessionId;
+            console.log('good login! session id: ' + User.sessionId);
+            $rootScope.$broadcast('userLoggedIn');
+          }
+        })
       });
     }
-
-
   }
 ]);
 
 chatApp.controller('chatCtrl', function($scope, Comment, User) {
 
-  $scope.$watch(function() {
-    return User;
-  }, function() {
-    $scope.checkingLoggedIn = User.checkingLoggedIn;
-    $scope.isLoggedIn = !!User.info;
+  $scope.$on('userLoggedIn', function() {
+    console.log('got broadcasted login event!');
+    $scope.checkingLoggedIn = false;
+    $scope.isLoggedIn = true;
     $scope.user = User.info;
-  }, true);
+    
+    getUserComments();
+    
+    setUpSocket();
+  });
   
   $scope.comments = [];
   
-  //
-  // Get current comments from the server on initial page load
-  //
-  var serverComments = Comment.query(function success() {
-    $scope.comments = serverComments;
-  }, function error(err) {
-    console.log('error! ', err);
-  });
-  
-
-  //
-  // Connect a socket to the server
-  //
-  console.log('environment.host: ' + environment.host);
-  var socket = io.connect(environment.host);
-  
-  //
-  // If we get a response, let's add it to the comments list
-  //
-  socket.on('addedComment', function (data) {
-    if(!$scope.$$phase) {
-      $scope.$apply(function() {
-        $scope.comments.push(data);
-      })
-    }
-  });
-
-  //
-  // The user has submitted a new comment
-  //
-  $scope.submitComment = function() {
-    // 
-    // Build data packet to send to the server.  This defines the app's objects!
+  function getUserComments() {
     //
-    var data = { text: $scope.comment };
+    // Get current comments from the server on initial page load
+    //
+    console.log('getting comments...');
     
+    var serverComments = Comment.query(function success() {
+      $scope.comments = serverComments;
+    }, function error(err) {
+      console.log('error! ', err);
+    });
+  }
+
+  function setUpSocket() {
     //
-    // Send the comment
+    // Connect a socket to the server
     //
-    socket.emit('addComment', data);
+    console.log('environment.host: ' + environment.host);
+    var socket = io.connect(environment.host);
 
     //
-    // Add our own comment directly to our comment list
+    // If we get a response, let's add it to the comments list
     //
-    $scope.comments.push(data);
-    $scope.comment = '';
+    socket.on('addedComment', function (data) {
+      if(!$scope.$$phase) {
+        $scope.$apply(function() {
+          $scope.comments.push(data);
+        })
+      }
+    });
 
+    //
+    // The user has submitted a new comment
+    //
+    $scope.submitComment = function() {
+      // 
+      // Build data packet to send to the server.  This defines the app's objects!
+      //
+      var data = { text: $scope.comment };
+
+      //
+      // Send the comment
+      //
+      socket.emit('addComment', data);
+
+      //
+      // Add our own comment directly to our comment list
+      //
+      $scope.comments.push(data);
+      $scope.comment = '';
+
+    }
   }
 });
