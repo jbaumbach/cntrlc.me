@@ -17,6 +17,7 @@ var express = require('express')
   , async = require('async')
   , util = require('util')
   , redis = require(process.cwd() + '/lib/redis')
+  , socket = require(process.cwd() + '/lib/socket')
 ;
 
 // all environments
@@ -54,7 +55,6 @@ if ('production' == app.get('env')) {
   ChatApp.host = 'http://socketio-chat.herokuapp.com';
 }
 
-
 //
 // Repository for all our comments.  Only suitable for development!  Does not
 // take into consideration persistence or multiple servers.
@@ -68,6 +68,7 @@ app.post('/loginfb', authorizationController.loginFb);
 // Support for getting server comments on initial page load
 //
 app.get('/api/v1/comments', function(req, res) {
+  // console.log('got headers: ' + util.inspect(req.headers));
   res.status(200).send(comments);
 });
 
@@ -76,8 +77,6 @@ var server = http.createServer(app);
 //
 // Start the socket.io server
 //
-var io = require('socket.io').listen(server);
-
 
 async.parallel({
   db: function(cb) {
@@ -97,19 +96,9 @@ async.parallel({
     // Socket listener.  Gets messages from the clients and rebroadcasts them
     // to all the other clients.
     //
-    io.sockets.on('connection', function (socket) {
-
-      // todo: use a unique id as a "room" to join
-      // see: http://socket.io/docs/rooms-and-namespaces/
-
-      socket.on('addComment', function (data) {
-        comments.push(data);
-        socket.broadcast.emit('addedComment', data);
-      });
-      
-    });
+    var io = socket.start(server);
     
-    cb();
+    cb(io ? null : 'cannot start socket server');
   }
 }, function(err, results) {
   if (err) {

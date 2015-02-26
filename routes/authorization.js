@@ -4,6 +4,7 @@ var async = require('async')
   , async = require('async')
   , redis = require(process.cwd() + '/lib/redis')
   , globalFunctions = require(process.cwd() + '/lib/global-functions')
+  , socket = require(process.cwd() + '/lib/socket')
 ;  
 
 //
@@ -32,7 +33,8 @@ var sampleFBBody = {
 }
 
 exports.loginFb = function(req, res) {
-  console.log('got body data: ' + util.inspect(req.body));
+  // console.log('got body data: ' + util.inspect(req.body));
+  
   var userId = 'user:fbid:' + req.body.info.id;
 
   /*
@@ -99,7 +101,7 @@ exports.loginFb = function(req, res) {
         method: 'GET'
       };
       
-      console.log('calling FB, going to use options: ' + util.inspect(options));
+      // console.log('calling FB, going to use options: ' + util.inspect(options));
       
       tinyHttp.executeCall(options, function(err, result) {
         if (err) {
@@ -167,6 +169,20 @@ exports.loginFb = function(req, res) {
           console.log('setting sessionUserKey: ' + sessionUserKey);
           client.set(sessionUserKey, req.body.info.id, function(err) {
             cb(err, sessionId);
+          });
+        },
+        function createUserSocket(sessionId, cb) {
+          //
+          // This is called when data is posted to the room
+          //
+          var storageFunc = function(data, cb) {
+            // todo: implement this!
+            console.log('will store data for user id: ' + userId);
+            cb();
+          };
+          
+          socket.createNamespace(sessionId, storageFunc, function() {
+            cb(null, sessionId);
           });
         }
       ], cb);

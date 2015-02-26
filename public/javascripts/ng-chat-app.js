@@ -177,10 +177,11 @@ chatApp.controller('chatCtrl', function($scope, Comment, User) {
     //
     // Connect a socket to the server
     //
-    console.log('environment.host: ' + environment.host);
-    var socket = io.connect(environment.host);
-
-    //
+    var namespaceId = environment.host + '/' + User.sessionId;
+    console.log('connecting to NS: ' + namespaceId);
+    var socket = io.connect(namespaceId);
+    
+    //Use 
     // If we get a response, let's add it to the comments list
     //
     socket.on('addedComment', function (data) {
