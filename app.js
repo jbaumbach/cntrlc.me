@@ -4,7 +4,7 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
+  , routes = require('./controllers')
   , http = require('http')
   , path = require('path')
   , app = express()
@@ -13,11 +13,12 @@ var express = require('express')
   , bodyParser = require('body-parser')
   , errorhandler = require('errorhandler')
   , config = require(process.cwd() + '/config/config')
-  , authorizationController = require(process.cwd() + '/routes/authorization')
+  , authorizationController = require(process.cwd() + '/controllers/authorization')
   , async = require('async')
   , util = require('util')
   , redis = require(process.cwd() + '/lib/redis')
   , socket = require(process.cwd() + '/lib/socket')
+  , debug = require('debug')('sit:app')
 ;
 
 // all environments
@@ -68,7 +69,7 @@ app.post('/loginfb', authorizationController.loginFb);
 // Support for getting server comments on initial page load
 //
 app.get('/api/v1/comments', function(req, res) {
-  // console.log('got headers: ' + util.inspect(req.headers));
+  // debug('got headers: ' + util.inspect(req.headers));
   res.status(200).send(comments);
 });
 
@@ -87,7 +88,7 @@ async.parallel({
     // Main site
     //
     server.listen(app.get('port'), function(){
-      console.log('(info) Express server listening on port ' + app.get('port'));
+      debug('(info) Express server listening on port ' + app.get('port'));
       cb();
     });
   },
@@ -102,11 +103,11 @@ async.parallel({
   }
 }, function(err, results) {
   if (err) {
-    console.log('error starting up: ' + util.inspect(err));    
+    debug('error starting up: ' + util.inspect(err));    
   } else {
-    console.log('*********************');
-    console.log('** all systems go! **');
-    console.log('*********************');
+    debug('*********************');
+    debug('** all systems go! **');
+    debug('*********************');
   }
 });
 
