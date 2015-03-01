@@ -199,7 +199,10 @@ chatApp.controller('chatCtrl', function($scope, Comment, User) {
       // 
       // Build data packet to send to the server.  This defines the app's objects!
       //
-      var data = { text: $scope.comment };
+      var data = { 
+        type: 'text/plain', 
+        value: $scope.comment 
+      };
 
       //
       // Send the comment
