@@ -138,7 +138,7 @@ exports.loginFb = function(req, res) {
       
       async.waterfall([
         function upsertUser(cb) {
-          console.log('have user id: ' + userId + ', inserting user record');
+          console.log('have user id: ' + userId + ', upserting user record');
           client.hmset(userId, req.body.info, function(err) {
             cb(err);
           });
@@ -152,35 +152,41 @@ exports.loginFb = function(req, res) {
           client.get(userSessionKey, function(err, response) {
             if (response) {
               console.log('found session, returning session id: ' + response);
-              cb(null, response);
+              cb(null, response, true);
             } else {
               var sessionId = globalFunctions.generateUUID(); 
               console.log('no session, setting one to: ' + sessionId);
               client.set(userSessionKey, sessionId, function(err) {
-                console.log('cb: ' + cb + ', err: ' + err + ', sessionId: ' + sessionId);
-                cb(err, sessionId);
+                cb(err, sessionId, false);
               });
             }
           });
           
         },
-        function setSessionUser(sessionId, cb) {
-          var sessionUserKey = 'sessionuser:' + sessionId;
-          console.log('setting sessionUserKey: ' + sessionUserKey);
-          client.set(sessionUserKey, req.body.info.id, function(err) {
-            cb(err, sessionId);
-          });
+        function setSessionUser(sessionId, sessionWasPreexisting, cb) {
+          //
+          // Don't bother indexing the session-user, it's already there.
+          //
+          if (sessionWasPreexisting) {
+            cb(null, sessionId, sessionWasPreexisting);
+          } else {
+            var sessionUserKey = 'sessionuser:' + sessionId;
+            console.log('setting sessionUserKey: ' + sessionUserKey);
+            client.set(sessionUserKey, req.body.info.id, function(err) {
+              cb(err, sessionId, sessionWasPreexisting);
+            });
+          }
         },
-        function createUserSocket(sessionId, cb) {
+        function createUserSocket(sessionId, sessionWasPreexisting, cb) {
           //
           // This is called when data is posted to the room
           //
           var storageFunc = function(data, cb) {
             // todo: implement this!
-            console.log('will store data for user id: ' + userId);
+            console.log('will eventually store comment for user id: ' + userId);
             cb();
           };
-          
+
           socket.createNamespace(sessionId, storageFunc, function() {
             cb(null, sessionId);
           });
