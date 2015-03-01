@@ -5,6 +5,7 @@ var async = require('async')
   , redis = require(process.cwd() + '/lib/redis')
   , globalFunctions = require(process.cwd() + '/lib/global-functions')
   , socket = require(process.cwd() + '/lib/socket')
+  , _ = require('underscore')
 ;  
 
 //
@@ -82,9 +83,9 @@ exports.loginFb = function(req, res) {
 
   3. Create session by inserting table(s).  Pass session id back to client
   
-  4. Client passes session id with every Websocket post
+  4. Client passes session id with every Websocket post (no! they're automatically subscribed to the correct room)
   
-  5. Websockets use session id as unique room key / id
+  5. Websockets use session id as unique room key / id  (yes!)
   
   6. After login, all "UserItems" passed back to client for display in order
 
@@ -93,19 +94,33 @@ exports.loginFb = function(req, res) {
   
   async.waterfall([
     function confirmIdentity(cb) {
+      
+      var fbAppId = GLOBAL.SocketIO.Config.get('Facebook:app_id');
+      var fbAppSecret = GLOBAL.SocketIO.Config.get('Facebook:app_secret');
+      
+      //
+      // If either of these happen, ensure you have the values from FB's admin page set in your config file.
+      //
+      if (!fbAppId) {
+        return cb({status:500, msg: 'Missing FB app id'});
+      } else if (!fbAppSecret) {
+        return cb({status:500, msg: 'Missing FB app secret'});
+      }
+      
       var options = {
         secure: true,
         url: 'https://graph.facebook.com/debug_token?input_token=' + req.body.FBAuthResponse.accessToken +
-          '&access_token=' + GLOBAL.SocketIO.Config.get('Facebook:app_id') + 
-          '|' + GLOBAL.SocketIO.Config.get('Facebook:app_secret'),
+          '&access_token=' + fbAppId + '|' + fbAppSecret,
         method: 'GET'
       };
       
       // console.log('calling FB, going to use options: ' + util.inspect(options));
       
       tinyHttp.executeCall(options, function(err, result) {
-        if (err) {
+        if (err || !result) {
           cb({status: 502, msg: 'Unable to validate FB access token'});
+        } else if (result.error) {
+          cb({status: 502, msg: 'Error from FB: ' + util.inspect(result.error)});
         } else {
           console.log('got result: ' + util.inspect(result));
           
@@ -132,14 +147,15 @@ exports.loginFb = function(req, res) {
         
       });
     },
-    function getRedisSession(cb) {
+    function doSessionConfig(cb) {
       
-      var client = redis.getClient();
-      
+      var redisClient = redis.getClient();
+      var userItemsKey = 'useritems:' + userId;
+
       async.waterfall([
         function upsertUser(cb) {
           console.log('have user id: ' + userId + ', upserting user record');
-          client.hmset(userId, req.body.info, function(err) {
+          redisClient.hmset(userId, req.body.info, function(err) {
             cb(err);
           });
         },
@@ -149,14 +165,14 @@ exports.loginFb = function(req, res) {
 
           var userSessionKey = 'usersession:' + userId;
           console.log('looking up userSessionKey: ' + userSessionKey);
-          client.get(userSessionKey, function(err, response) {
+          redisClient.get(userSessionKey, function(err, response) {
             if (response) {
               console.log('found session, returning session id: ' + response);
               cb(null, response, true);
             } else {
               var sessionId = globalFunctions.generateUUID(); 
               console.log('no session, setting one to: ' + sessionId);
-              client.set(userSessionKey, sessionId, function(err) {
+              redisClient.set(userSessionKey, sessionId, function(err) {
                 cb(err, sessionId, false);
               });
             }
@@ -172,7 +188,7 @@ exports.loginFb = function(req, res) {
           } else {
             var sessionUserKey = 'sessionuser:' + sessionId;
             console.log('setting sessionUserKey: ' + sessionUserKey);
-            client.set(sessionUserKey, req.body.info.id, function(err) {
+            redisClient.set(sessionUserKey, req.body.info.id, function(err) {
               cb(err, sessionId, sessionWasPreexisting);
             });
           }
@@ -182,24 +198,56 @@ exports.loginFb = function(req, res) {
           // This is called when data is posted to the room
           //
           var storageFunc = function(data, cb) {
-            // todo: implement this!
-            console.log('will eventually store comment for user id: ' + userId);
-            cb();
+            
+            //
+            // zadd format: key, score, value
+            //
+            var entry = [userItemsKey, new Date().valueOf(), JSON.stringify(data)];
+            console.log('adding new entry (zadd): ' + util.inspect(entry));
+            redisClient.zadd(entry, cb);
           };
 
-          socket.createNamespace(sessionId, storageFunc, function() {
-            cb(null, sessionId);
+          //
+          // Create (or recycle!) a socket.namespace, and set the above function to be called whenever we get data
+          //
+          socket.createNamespace(sessionId, storageFunc, function(err) {
+            cb(err, sessionId);
+          });
+        },
+        //
+        // todo: client should make a separate call for this, so it should be in a controller.  
+        // putting here now for dev purposes.
+        //
+        function getUserItems(sessionId, cb) {
+          var searchArgs = [userItemsKey, 0, 50, 'WITHSCORES'];
+          redisClient.zrange(searchArgs, function(err, results) {
+            if (err) {
+              cb(err);
+            } else {
+              
+              var userItems = [];
+              
+              _.map(results, function(result, index) {
+                if (index % 2 === 0) {
+                  userItems.push(JSON.parse(result));
+                } else {
+                  userItems[userItems.length - 1].timestamp = result;
+                }
+              });
+              
+              cb(null, sessionId);
+            }
           });
         }
       ], cb);
     }
-  ], function(err, result) {
+  ], function returnResults(err, sessionId) {
     if (err) {
       console.log('got err: ' + util.inspect(err));
       res.status(500).send({msg: util.inspect(err)});
     } else {
-      console.log('done with everything, returning session id: ' + util.inspect(result));
-      res.status(200).send({sessionId: result});
+      console.log('done with everything, returning session id: ' + util.inspect(sessionId));
+      res.status(200).send({sessionId: sessionId});
     }
 
   })
