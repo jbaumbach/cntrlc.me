@@ -14,6 +14,7 @@ var express = require('express')
   , errorhandler = require('errorhandler')
   , config = require(process.cwd() + '/config/config')
   , authorizationController = require(process.cwd() + '/controllers/authorization')
+  , commentsController = require(process.cwd() + '/controllers/comments')
   , async = require('async')
   , util = require('util')
   , redis = require(process.cwd() + '/lib/redis')
@@ -34,6 +35,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //
 // Global namespace
+//
+// todo: delete this, use the one in config.js, and change to "controlc"
 //
 ChatApp = {
   host: 'notset'
@@ -57,28 +60,21 @@ if ('production' == app.get('env')) {
 }
 
 //
-// Repository for all our comments.  Only suitable for development!  Does not
-// take into consideration persistence or multiple servers.
+// Routes - can eventually be moved to routes controller
 //
-var comments = [];
-
 app.get('/', routes.index);
 app.post('/loginfb', authorizationController.loginFb);
+app.get('/api/v1/comments', commentsController.index);
+
 
 //
-// Support for getting server comments on initial page load
+// Start the Express server
 //
-app.get('/api/v1/comments', function(req, res) {
-  // debug('got headers: ' + util.inspect(req.headers));
-  res.status(200).send(comments);
-});
-
 var server = http.createServer(app);
 
 //
-// Start the socket.io server
+// Set up required application systems 
 //
-
 async.parallel({
   db: function(cb) {
     redis.connectToRedis(cb);
