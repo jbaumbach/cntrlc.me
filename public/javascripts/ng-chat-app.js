@@ -2,6 +2,16 @@
 var chatApp = angular.module('chatApp', ['ngResource']);
 var checkLoginState;      // Required by FB SDK - ensure it's in scope at all times
 
+chatApp.service('Authorization', ['$http', function($http) {
+  this.setSessionId = function(sessionId) {
+    console.log('setting Bearer token to header: ', sessionId);
+    //
+    // Set session ID in $http headers for all future requests
+    //
+    $http.defaults.headers.common.Authorization = 'Bearer ' + sessionId;
+  }    
+}]);
+
 //
 // Resource to load comments from the server
 //
@@ -9,7 +19,7 @@ chatApp.factory('Comment', ['$resource', function($resource) {
   return $resource('/api/v1/comments');
 }]);
 
-chatApp.factory('User', ['$http', function($http) {
+chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization) {
   return {
     FBAuthResponse: null,
     info: null,
@@ -21,12 +31,13 @@ chatApp.factory('User', ['$http', function($http) {
         info: this.info
       }).
         success(function(data, status, headers, config) {
-          console.log('good login, setting Bearer header: ', data, status);
           
           //
           // Set session ID in $http headers for all future requests
           //
-          $http.defaults.headers.common.Authorization = 'Bearer ' + data.sessionId;
+          //$http.defaults.headers.common.Authorization = 'Bearer ' + data.sessionId;
+
+          Authorization.setSessionId(data.sessionId);
 
           callback(null, data.sessionId);
         }).
