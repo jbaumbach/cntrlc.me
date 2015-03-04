@@ -213,31 +213,6 @@ exports.loginFb = function(req, res) {
           socket.createNamespace(sessionId, storageFunc, function(err) {
             cb(err, sessionId);
           });
-        },
-        //
-        // todo: client should make a separate call for this, so it should be in a controller.  
-        // putting here now for dev purposes.
-        //
-        function getUserItems(sessionId, cb) {
-          var searchArgs = [userItemsKey, 0, 50, 'WITHSCORES'];
-          redisClient.zrange(searchArgs, function(err, results) {
-            if (err) {
-              cb(err);
-            } else {
-              
-              var userItems = [];
-              
-              _.map(results, function(result, index) {
-                if (index % 2 === 0) {
-                  userItems.push(JSON.parse(result));
-                } else {
-                  userItems[userItems.length - 1].timestamp = result;
-                }
-              });
-              
-              cb(null, sessionId);
-            }
-          });
         }
       ], cb);
     }
