@@ -22,6 +22,11 @@ var express = require('express')
   , debug = require('debug')('sit:app')
 ;
 
+//
+// Export the express app, mainly for use in tests
+//
+exports.app = app;
+
 // all environments
 app.set('port', process.env.PORT || 3010);
 app.set('views', __dirname + '/views');
