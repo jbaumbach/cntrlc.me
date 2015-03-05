@@ -1,7 +1,4 @@
-
-/**
- * Module dependencies.
- */
+require(process.cwd() + '/config/config');
 
 var express = require('express')
   , routes = require('./controllers')
