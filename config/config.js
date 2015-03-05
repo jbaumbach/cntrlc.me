@@ -5,6 +5,10 @@ var nconf = require('nconf')
 //
 // Include this file anywhere you need to access the app's config variables
 //
+// Access a variable like:
+//
+//  GLOBAL.SocketIO.Config.get('Facebook:app_id');
+//
 
 // Set a default env
 process.env.NODE_ENV = (process.env.NODE_ENV || "development");

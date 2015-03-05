@@ -12,7 +12,6 @@ var express = require('express')
   , morgan = require('morgan')
   , bodyParser = require('body-parser')
   , errorhandler = require('errorhandler')
-  , config = require(process.cwd() + '/config/config')
   , authorizationController = require(process.cwd() + '/controllers/authorization')
   , commentsController = require(process.cwd() + '/controllers/comments')
   , async = require('async')
@@ -38,30 +37,10 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//
-// Global namespace
-//
-// todo: delete this, use the one in config.js, and change to "controlc"
-//
-ChatApp = {
-  host: 'notset'
-}
 
 // development only
-if ('development' == app.get('env')) {
+if ('production' !== app.get('env')) {
   app.use(errorhandler());
-  ChatApp.host = 'http://localhost:' + app.get('port');
-}
-
-// staging only
-if ('staging' == app.get('env')) {
-  app.use(errorhandler());
-  ChatApp.host = 'http://socketio-chat.herokuapp.com';
-}
-
-// production
-if ('production' == app.get('env')) {
-  ChatApp.host = 'http://socketio-chat.herokuapp.com';
 }
 
 //
