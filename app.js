@@ -28,7 +28,7 @@ var express = require('express')
 exports.app = app;
 
 // all environments
-app.set('port', process.env.PORT || 3010);
+app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
