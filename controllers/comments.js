@@ -91,7 +91,7 @@ exports.index = function(req, res) {
         var offset = req.offset || 0;
         var limit = req.limit || 50;
         var searchArgs = [userItemsKey, offset, limit, 'WITHSCORES'];
-        redisClient.zrange(searchArgs, function(err, results) {
+        redisClient.zrevrange(searchArgs, function(err, results) {
           if (err) {
             cb({status:500, msg: 'error getting user items'});
           } else {

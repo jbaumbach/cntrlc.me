@@ -23,7 +23,7 @@ chatApp.service('Authorization', ['$http', function($http) {
 // Utility functions
 //
 chatApp.service('GlobalFunctions', function() {
-  this.validateUrl = function(url) {
+  this.isUrl = function(url) {
     // useful variations: http://mathiasbynens.be/demo/url-regex
     var urlRegex = /(((http|https):\/{2})+(([0-9a-z_-]+\.)+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mn|mn|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-9]+)?((\/([~0-9a-zA-Z\#\+\%@\.\/_-]+))?(\?[0-9a-zA-Z\+\%@\/&\[\];=_-]+)?)?))\b/gi;
     return urlRegex.test(url);
@@ -177,75 +177,82 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
 //
 // Angular controller for the main screen
 //
-chatApp.controller('chatCtrl', function($scope, Comment, User) {
-
-  $scope.$on('userLoggedIn', function() {
-    DEBUG && console.log('got broadcasted login event!');
-    $scope.checkingLoggedIn = false;
-    $scope.isLoggedIn = true;
-    $scope.user = User.info;
-    
-    getUserComments();
-    setUpSocket();
-  });
-  
-  $scope.comments = [];
-  
-  function getUserComments() {
-    //
-    // Get current comments from the server on initial page load
-    //
-    DEBUG && console.log('getting comments...');
-    
-    var serverComments = Comment.query(function success() {
-      $scope.comments = serverComments;
-    }, function error(err) {
-      DEBUG && console.log('error! ', err);
+chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
+  function($scope, Comment, User, GlobalFunctions) {
+    $scope.$on('userLoggedIn', function() {
+      DEBUG && console.log('got broadcasted login event!');
+      $scope.checkingLoggedIn = false;
+      $scope.isLoggedIn = true;
+      $scope.user = User.info;
+      
+      getUserComments();
+      setUpSocket();
     });
-  }
-
-  function setUpSocket() {
-    //
-    // Connect a socket to the server
-    //
-    var namespaceId = environment.host + '/' + User.sessionId;
-    DEBUG && console.log('connecting to NS: ' + namespaceId);
-    var socket = io.connect(namespaceId);
     
-    // 
-    // If we get a response, let's add it to the comments list
-    //
-    socket.on('addedComment', function (data) {
-      if(!$scope.$$phase) {
-        $scope.$apply(function() {
-          $scope.comments.push(data);
-        })
+    $scope.comments = [];
+    
+    $scope.commentType = function(comment) {
+      if (GlobalFunctions.isUrl(comment.value)) {
+        return "url"
+      } else {
+        return "text"
       }
-    });
-
-    //
-    // The user has submitted a new comment
-    //
-    $scope.submitComment = function() {
-      // 
-      // Build data packet to send to the server.  This defines the app's objects!
-      //
-      var data = { 
-        type: 'text/plain', 
-        value: $scope.comment 
-      };
-
-      //
-      // Send the comment
-      //
-      socket.emit('addComment', data);
-
-      //
-      // Add our own comment directly to our comment list
-      //
-      $scope.comments.push(data);
-      $scope.comment = '';
-
     }
-  }
-});
+    
+    function getUserComments() {
+      //
+      // Get current comments from the server on initial page load
+      //
+      DEBUG && console.log('getting comments...');
+      
+      var serverComments = Comment.query(function success() {
+        $scope.comments = serverComments;
+      }, function error(err) {
+        DEBUG && console.log('error! ', err);
+      });
+    }
+  
+    function setUpSocket() {
+      //
+      // Connect a socket to the server
+      //
+      var namespaceId = environment.host + '/' + User.sessionId;
+      DEBUG && console.log('connecting to NS: ' + namespaceId);
+      var socket = io.connect(namespaceId);
+      
+      // 
+      // If we get a response, let's add it to the comments list
+      //
+      socket.on('addedComment', function (data) {
+        if(!$scope.$$phase) {
+          $scope.$apply(function() {
+            $scope.comments.unshift(data);
+          })
+        }
+      });
+  
+      //
+      // The user has submitted a new comment
+      //
+      $scope.submitComment = function() {
+        // 
+        // Build data packet to send to the server.  This defines the app's objects!
+        //
+        var data = { 
+          type: 'text/plain', 
+          value: $scope.comment 
+        };
+  
+        //
+        // Send the comment
+        //
+        socket.emit('addComment', data);
+  
+        //
+        // Add our own comment directly to our comment list
+        //
+        $scope.comments.unshift(data);
+        $scope.comment = '';
+      }
+    }
+}]);

@@ -72,7 +72,14 @@
         <p ng-cloak ng-show="comments.length === 0">No comments yet!</p>
         <ul ng-cloak>
           <!-- todo: implement mime types -->
-          <li ng-repeat="comment in comments">{{ comment.value }}</li>
+          <li ng-repeat="comment in comments">
+            <div ng-show="commentType(comment) === 'url'">
+              <a href="{{ comment.value }}">{{ comment.value }}</a>
+            </div>
+            <div ng-show="commentType(comment) === 'text'">
+              {{ comment.value }}
+            </div>
+          </li>
         </ul>
       </div>
       
