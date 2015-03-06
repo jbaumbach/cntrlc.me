@@ -17,8 +17,6 @@
   </head>
 
   <body ng-controller="chatCtrl">
-    <script>
-    </script>
     
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
@@ -29,7 +27,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Signal.io Example</a>
+          <a class="navbar-brand" href="#">Controlc.me</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -43,11 +41,7 @@
 
     <div class="container">
 
-      <div ng-cloak ng-show="checkingLoggedIn">
-        <h2>Checking login...</h2>
-      </div>
-      
-      <div ng-cloak ng-hide="isLoggedIn || checkingLoggedIn">
+      <div ng-cloak ng-show="pageState == 'showHomepage'">
         <h1>Login to access your personal clipboard.</h1>
         <aside>For login only - we'll never post anything on your behalf, nor save your public data.</aside>
         <div id="fb-root"></div>
@@ -58,17 +52,20 @@
         </div>
       </div>
 
-      <div ng-cloak ng-show="isLoggedIn">
+      <div class="checkingLoggedIn" ng-cloak ng-show="pageState == 'checkingLoggedIn'">
+        <h2>Loading... <img class="spinner" src="/images/spinner.gif"></h2>
+      </div>
+      
+      <div ng-cloak ng-show="pageState == 'isLoggedIn'">
         <p></p>
         <form role="form">
           <div class="form-group">
-            <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter comment" ng-model="comment">
+            <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter text/url" ng-model="comment">
           </div>
           <button type="submit" class="btn btn-default" ng-click="submitComment()">Submit</button>
         </form>
 
-
-        <h1>{{ user.first_name }}'s Comments</h1>
+        <h1>{{ user.first_name }}'s Clipboard</h1>
         <p ng-cloak ng-show="comments.length === 0">No comments yet!</p>
         <ul ng-cloak>
           <!-- todo: implement mime types -->

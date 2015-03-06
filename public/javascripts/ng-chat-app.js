@@ -4,7 +4,16 @@
 
 var chatApp = angular.module('chatApp', ['ngResource']);
 var checkLoginState;      // Required by FB SDK - ensure it's in scope at all times
-var DEBUG = false;        // set to "true" to enable console logging (development only)
+var DEBUG = true;        // set to "true" to enable console logging (development only)
+
+//
+// Write to the console if we have one and debug is TRUE.
+//
+function log(items) {
+  if (DEBUG && console.log) {
+    console.log(Array.prototype.slice.call(arguments));
+  }
+}
 
 //
 // Enable our bearer token (e.g. session id) to be sent on every $http request
@@ -45,7 +54,6 @@ chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization
     FBAuthResponse: null,
     info: null,
     login: function(callback) {
-      
       $http.post(environment.host + '/loginfb', {
         FBAuthResponse: this.FBAuthResponse,
         info: this.info
@@ -55,7 +63,7 @@ chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization
           callback(null, data.sessionId);
         }).
         error(function(data, status, headers, config) {
-          DEBUG && console.log('error: ', data, status);
+          log('error: ', data, status);
           callback('sorry, login error');
         });
     }
@@ -69,11 +77,11 @@ chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization
 chatApp.run(['$rootScope', '$window', 'User', '$http',
   function($rootScope, $window, User, $http) {
 
-    $rootScope.$apply(function() {
-      User.checkingLoggedIn = true;
-    });
+    //$rootScope.$apply(function() {
+    //  User.checkingLoggedIn = true;
+    //});
 
-    DEBUG && console.log('app started!');
+    log('app started!');
 
     //
     // FB SDK stuff
@@ -83,12 +91,12 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
 
       // todo: solve flashing messages issue in UI when user is already logged in (easy)
       
-      $rootScope.$apply(function() {
-        User.checkingLoggedIn = false;
-      });
+      //$rootScope.$apply(function() {
+      //  User.checkingLoggedIn = false;
+      //});
 
-      DEBUG && console.log('statusChangeCallback');
-      DEBUG && console.log(response);
+      log('statusChangeCallback');
+      log(response);
       
       // The response object is returned with a status field that lets the
       // app know the current login status of the person.
@@ -103,6 +111,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
       } else {
         // The person is not logged into Facebook, so we're not sure if
         // they are logged into this app or not.
+        $rootScope.$broadcast('pageState', 'showHomepage');
       }
     }
 
@@ -153,24 +162,27 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
     // Here we run a very simple test of the Graph API after login is
     // successful.  See statusChangeCallback() for when this call is made.
     function continueLogin() {
-      DEBUG && console.log('Welcome!  Fetching your information.... ');
+      log('Welcome!  Fetching your information.... ');
       FB.api('/me', function(response) {
-        DEBUG && console.log('Successful FB response for: ' + response.name);
+        log('Successful FB response for: ' + response.name);
 
         User.info = response;
-        DEBUG && console.log('Got user info!: ', User);
+        log('Got user info!: ', User);
 
         User.login(function(err, sessionId) {
           if (err) {
-            DEBUG && console.log('got error! ', err);
+            log('got error! ', err);
           } else {
             User.sessionId = sessionId;
-            DEBUG && console.log('good login! session id: ' + User.sessionId);
+            log('good login! session id: ' + User.sessionId);
             $rootScope.$broadcast('userLoggedIn');
           }
         })
       });
     }
+
+    // todo: figure out why this isn't working
+    $rootScope.$broadcast('pageState', 'checkingLoggedIn');
   }
 ]);
 
@@ -179,12 +191,29 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
 //
 chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
   function($scope, Comment, User, GlobalFunctions) {
+    
+    function setPageState(state) {
+      log('setting page state: ' + state);
+      if(!$scope.$$phase) {
+        $scope.$apply(function() {
+          $scope.pageState = state;
+        })
+      }
+    }
+    
+    //
+    // Listen fo broadcasted events from any other module 
+    // (e.g. FB module)
+    //
+    $scope.$on('pageState', function(event, state) {
+      setPageState(state);
+    });
+    
     $scope.$on('userLoggedIn', function() {
-      DEBUG && console.log('got broadcasted login event!');
-      $scope.checkingLoggedIn = false;
-      $scope.isLoggedIn = true;
+      log('got broadcasted login event!');
       $scope.user = User.info;
-      
+
+      setPageState('isLoggedIn');
       getUserComments();
       setUpSocket();
     });
@@ -197,18 +226,18 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       } else {
         return "text"
       }
-    }
+    };
     
     function getUserComments() {
       //
       // Get current comments from the server on initial page load
       //
-      DEBUG && console.log('getting comments...');
+      log('getting comments...');
       
       var serverComments = Comment.query(function success() {
         $scope.comments = serverComments;
       }, function error(err) {
-        DEBUG && console.log('error! ', err);
+        log('error! ', err);
       });
     }
   
@@ -217,7 +246,7 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       // Connect a socket to the server
       //
       var namespaceId = environment.host + '/' + User.sessionId;
-      DEBUG && console.log('connecting to NS: ' + namespaceId);
+      log('connecting to NS: ' + namespaceId);
       var socket = io.connect(namespaceId);
       
       // 
@@ -255,4 +284,6 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
         $scope.comment = '';
       }
     }
+
+    setPageState('checkingLoggedIn');
 }]);
