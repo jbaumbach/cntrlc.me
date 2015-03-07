@@ -7,6 +7,10 @@ a {
   color: #00B7FF;
 }
 
+#login-buttons {
+  padding: 10px 0 0;
+}
+
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
