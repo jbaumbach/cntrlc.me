@@ -6,8 +6,7 @@ var debug = require('debug')('sit:controllers:authorization')
 ;
 
 //
-// Good candidate for middleware - do that if this app gets more 
-// complicated
+// Middleware for authenticating a comments request
 //
 var authenticateSession = exports.authenticateSession = function(req, res, next) {
   function transportError(statusCode, message, cb) {
@@ -68,59 +67,43 @@ var authenticateSession = exports.authenticateSession = function(req, res, next)
 };
 
 exports.index = function(req, res) {
-  
-  /*
-    process:
-    
-    1. get user id for session id from Redis (should be middleware - Passport?)
-    
-    2. get user comments from redis - grab code from authorization.js function
-    
-    3. return them to the client
-    
-   */
-  authenticateSession(req, res, function() {
-    debug('todo: get user comments for user: ' + util.inspect(req.user));
+  var redisClient = redis.getClient();
+  async.waterfall([
+    function getUserComments(cb) {
+      var userId = 'user:fbid:' + req.user.id;
+      var userItemsKey = 'useritems:' + userId;
 
-    var redisClient = redis.getClient();
-    async.waterfall([
-      function getUserComments(cb) {
-        var userId = 'user:fbid:' + req.user.id;
-        var userItemsKey = 'useritems:' + userId;
+      var offset = req.offset || 0;
+      var limit = req.limit || 50;
+      var searchArgs = [userItemsKey, offset, limit, 'WITHSCORES'];
+      redisClient.zrevrange(searchArgs, function(err, results) {
+        if (err) {
+          cb({status:500, msg: 'error getting user items'});
+        } else {
 
-        var offset = req.offset || 0;
-        var limit = req.limit || 50;
-        var searchArgs = [userItemsKey, offset, limit, 'WITHSCORES'];
-        redisClient.zrevrange(searchArgs, function(err, results) {
-          if (err) {
-            cb({status:500, msg: 'error getting user items'});
-          } else {
+          var userItems = [];
 
-            var userItems = [];
+          //
+          // Redis returns items as a list having a value followed by timestamp
+          // Convert this to an array of items with the timestamp as a property
+          //
+          _.map(results, function(result, index) {
+            if (index % 2 === 0) {
+              userItems.push(JSON.parse(result));
+            } else {
+              userItems[userItems.length - 1].timestamp = result;
+            }
+          });
 
-            //
-            // Redis returns items as a list having a value followed by timestamp
-            // Convert this to an array of items with the timestamp as a property
-            //
-            _.map(results, function(result, index) {
-              if (index % 2 === 0) {
-                userItems.push(JSON.parse(result));
-              } else {
-                userItems[userItems.length - 1].timestamp = result;
-              }
-            });
-
-            cb(null, userItems);
-          }
-        });
-      }
-    ], function(err, result) {
-      if (err) {
-        res.status(err.status).send({msg: err.msg});
-      } else {
-        res.status(200).send(result);
-      }
-    });
+          cb(null, userItems);
+        }
+      });
+    }
+  ], function(err, result) {
+    if (err) {
+      res.status(err.status).send({msg: err.msg});
+    } else {
+      res.status(200).send(result);
+    }
   });
-  
 }

@@ -45,7 +45,7 @@ if ('production' !== app.get('env')) {
 //
 app.get('/', routes.index);
 app.post('/loginfb', authorizationController.loginFb);
-app.get('/api/v1/comments', commentsController.index);
+app.get('/api/v1/comments', commentsController.authenticateSession, commentsController.index);
 
 
 //
