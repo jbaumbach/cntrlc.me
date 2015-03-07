@@ -40,15 +40,17 @@
     </div>
 
     <div class="container">
-
       <div ng-cloak ng-show="pageState == 'showHomepage'">
-        <h1>Login to access your personal clipboard.</h1>
-        <aside>For login only - we'll never post anything on your behalf, nor save your public data.</aside>
-        <div id="fb-root"></div>
-        <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-        </fb:login-button>
-
-        <div id="status">
+        <h1>Your Secure Personal Clipboard</h1>
+        <p><b>controlc.me</b> is for quickly and securely sharing text and links between your devices without installing 
+          any apps. Just go to <b>controlc.me</b> and paste in your text.  It'll appear instantly on any other logged in device.</p>
+        <p>Login to access your clipboard.  We don't ask for any additional Facebook permissions.</p>
+        <div id="login-buttons" style="alignment: auto">
+          <div id="fb-root"></div>
+          <fb:login-button scope="public_profile,email" size="large" onlogin="checkLoginState();">
+          </fb:login-button>
+          <div id="status">
+          </div>
         </div>
       </div>
 

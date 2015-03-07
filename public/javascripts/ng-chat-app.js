@@ -77,9 +77,9 @@ chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization
 chatApp.run(['$rootScope', '$window', 'User', '$http',
   function($rootScope, $window, User, $http) {
 
-    //$rootScope.$apply(function() {
-    //  User.checkingLoggedIn = true;
-    //});
+    function setPageState(state) {
+      $rootScope.$broadcast('pageState', state);
+    }
 
     log('app started!');
 
@@ -108,10 +108,11 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
         continueLogin();
       } else if (response.status === 'not_authorized') {
         // The person is logged into Facebook, but not your app.
+        setPageState('showHomepage');
       } else {
         // The person is not logged into Facebook, so we're not sure if
         // they are logged into this app or not.
-        $rootScope.$broadcast('pageState', 'showHomepage');
+        setPageState('showHomepage');
       }
     }
 
@@ -119,6 +120,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
     // Button.  See the onlogin handler attached to it in the sample
     // code below.
     checkLoginState = function() {
+      setPageState('checkingLoggedIn');
       FB.getLoginStatus(function(response) {
         statusChangeCallback(response);
       });
@@ -181,8 +183,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
       });
     }
 
-    // todo: figure out why this isn't working
-    $rootScope.$broadcast('pageState', 'checkingLoggedIn');
+    setPageState('checkingLoggedIn');
   }
 ]);
 
@@ -192,12 +193,18 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
 chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
   function($scope, Comment, User, GlobalFunctions) {
     
+    //
+    // todo: Understand why these coding gymnastics are required
+    //
     function setPageState(state) {
-      log('setting page state: ' + state);
       if(!$scope.$$phase) {
         $scope.$apply(function() {
           $scope.pageState = state;
         })
+      } else {
+        setTimeout(function() {
+          setPageState(state);
+        }, 100);
       }
     }
     
