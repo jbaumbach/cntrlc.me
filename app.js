@@ -32,8 +32,8 @@ app.set('view engine', 'ejs');
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(routes.requireHTTPS);
+app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('production' !== app.get('env')) {

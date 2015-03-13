@@ -1,10 +1,11 @@
-
-/*
- * GET home page.
- */
+var util = require('util')
+  ;
 
 exports.requireHTTPS = function(req, res, next) {
-  if (!req.secure && process.env.NODE_ENV !== "development") {
+  //
+  // The 'x-forwarded-proto' check is for Heroku
+  //
+  if (!req.secure && req.get('x-forwarded-proto') !== 'https' && process.env.NODE_ENV !== "development") {
     return res.redirect('https://' + req.get('host') + req.url);
   }
   next();
