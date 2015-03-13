@@ -46,6 +46,7 @@ if ('production' !== app.get('env')) {
 app.get('/', routes.index);
 app.post('/loginfb', authorizationController.loginFb);
 app.get('/api/v1/comments', commentsController.authenticateSession, commentsController.index);
+app.delete('/api/v1/comments/:id', commentsController.authenticateSession, commentsController.destroy);
 
 
 //

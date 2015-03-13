@@ -69,19 +69,22 @@
 
         <h1>{{ user.first_name }}'s Clipboard</h1>
         <p ng-cloak ng-show="comments.length === 0">No comments yet!</p>
-        <ul ng-cloak>
-          <!-- todo: implement mime types -->
-          <li ng-repeat="comment in comments">
-            <div ng-show="commentType(comment) === 'url'">
-              <a href="{{ comment.value }}">{{ comment.value }}</a>
+        <div ng-cloak ng-show="comments.length > 0">
+          <div class="comment-list" ng-repeat="comment in comments">
+            <div class="action-box" ng-class="comment.selected ? 'checked' : ''" ng-click="comment.selected = !comment.selected"></div>
+            <div class="comment-item">
+              <div ng-show="commentType(comment) === 'url'">
+                <a href="{{ comment.value }}">{{ comment.value }}</a>
+              </div>
+              <div ng-show="commentType(comment) === 'text'">
+                {{ comment.value }}
+              </div>
             </div>
-            <div ng-show="commentType(comment) === 'text'">
-              {{ comment.value }}
-            </div>
-          </li>
-        </ul>
+            <div class="comment-end"></div>
+          </div>
+          <div class="delete-button" ng-click="deleteSelected()"></div>
+        </div>
       </div>
-      
     </div><!-- /.container -->
   
   

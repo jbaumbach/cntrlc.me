@@ -10,6 +10,39 @@ a {
 #login-buttons {
   padding: 10px 0 0;
 }
+.comment-list {
+  border: 0px solid blue;
+}
+
+.comment-item {
+  border: 0px solid red;
+  padding: 4px 38px;
+}
+
+.action-box {
+  background-image: url("/images/checkbox-states-sml.gif");
+  background-position: bottom;
+  width: 20px;
+  height: 20px;
+  float: left;
+  margin: 5px;
+}
+
+.checked {
+  background-position: top;
+}
+
+.comment-end {
+  clear: both;
+}
+
+.delete-button {
+  background-image: url("/images/trash.png");
+  background-size: contain;
+  width:30px;
+  height: 30px;
+  margin-top: 10px;
+}
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
