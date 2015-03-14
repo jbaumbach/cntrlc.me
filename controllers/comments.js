@@ -66,20 +66,6 @@ var authenticateSession = exports.authenticateSession = function(req, res, next)
   });
 };
 
-exports.destroy = function(req, res) {
-  var redisClient = redis.getClient();
-  var userId = 'user:fbid:' + req.user.id;
-  var userItemsKey = 'useritems:' + userId;
-  var score = req.params.id;
-  redisClient.zremrangebyscore(userItemsKey, score, score, function(err, result) {
-    if (err) {
-      res.status(500).send({msg: 'error removing comment: ' + err});
-    } else {
-      res.status(200).send({msg: 'ok'});
-    }
-  });
-};
-
 exports.index = function(req, res) {
   var redisClient = redis.getClient();
   async.waterfall([
