@@ -130,21 +130,6 @@ exports.loginFb = function(req, res) {
             cb({status: 422, msg: 'FB token does not match user info'});
           }
         }
-
-        //{
-        //  data: {
-        //    app_id: '592373607574396',
-        //      application: 'Socketio Chat - LocalDev',
-        //      expires_at: 1424761200,
-        //      is_valid: true,
-        //      scopes: [
-        //      'public_profile',
-        //      'email'
-        //    ],
-        //      user_id: '10204941785718115'
-        //  }
-        //}
-        
       });
     },
     function doSessionConfig(cb) {
@@ -177,7 +162,6 @@ exports.loginFb = function(req, res) {
               });
             }
           });
-          
         },
         function setSessionUser(sessionId, sessionWasPreexisting, cb) {
           //
@@ -202,15 +186,24 @@ exports.loginFb = function(req, res) {
             //
             // zadd format: key, score, value
             //
-            var entry = [userItemsKey, new Date().valueOf(), JSON.stringify(data)];
+            var score = new Date().valueOf();
+            var entry = [userItemsKey, score, JSON.stringify(data)];
             console.log('adding new entry (zadd): ' + util.inspect(entry));
-            redisClient.zadd(entry, cb);
+            redisClient.zadd(entry, function(err) {
+              cb(err, score);
+            });
           };
 
+          var deleteFunc = function(id, cb) {
+            var score = id;
+            console.log('deleting id: ' + id);
+            redisClient.zremrangebyscore(userItemsKey, score, score, cb);
+          };
+          
           //
           // Create (or recycle!) a socket.namespace, and set the above function to be called whenever we get data
           //
-          socket.createNamespace(sessionId, storageFunc, function(err) {
+          socket.createNamespace(sessionId, storageFunc, deleteFunc, function(err) {
             cb(err, sessionId);
           });
         }
