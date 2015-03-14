@@ -28,7 +28,8 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-//app.use(favicon(__dirname + '/public/favicon.ico'));  // todo: create icon
+// From: http://uxrepo.com/icon-sets/ionicons
+app.use(favicon(__dirname + '/public/images/favicon.ico'));
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
