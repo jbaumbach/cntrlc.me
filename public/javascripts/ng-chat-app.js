@@ -43,7 +43,7 @@ chatApp.service('GlobalFunctions', function() {
 // Resource to load comments from the server
 //
 chatApp.factory('Comment', ['$resource', function($resource) {
-  return $resource('/api/v1/comments');
+  return $resource('/api/v1/comments/:id');
 }]);
 
 //
@@ -248,6 +248,30 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       });
     }
   
+    function deleteCommentById(id) {
+      if(!$scope.$$phase) {
+        $scope.$apply(function() {
+          var indexToDelete, loop = 0;
+          angular.forEach($scope.comments, function(comment) {
+            if (comment.timestamp === id) {
+              indexToDelete = loop;
+            }
+            loop++;
+          });
+          if (indexToDelete >= 0) {
+            $scope.comments.splice(indexToDelete, 1);
+          } else {
+            log('no index to delete!');
+          }
+        });
+      } else {
+        log('no phase!');
+        setTimeout(function() {
+          deleteCommentById(id);
+        }, 100);
+      }
+    };
+    
     function setUpSocket() {
       //
       // Connect a socket to the server
@@ -267,10 +291,19 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
         }
       });
   
+      socket.on('deletedComment', function(id) {
+        deleteCommentById(id);
+      });
+      
       //
       // The user has submitted a new comment
       //
       $scope.submitComment = function() {
+        
+        if (!$scope.comment) {
+          return;
+        }
+        
         // 
         // Build data packet to send to the server.  This defines the app's objects!
         //
@@ -284,11 +317,16 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
         //
         socket.emit('addComment', data);
   
-        //
-        // Add our own comment directly to our comment list
-        //
-        $scope.comments.unshift(data);
         $scope.comment = '';
+      };
+      
+      $scope.deleteSelected = function() {
+        angular.forEach($scope.comments, function(comment) {
+          if (comment.selected) {
+            var id = comment.timestamp;
+            socket.emit('deleteComment', id);
+          }
+        });
       }
     }
 
