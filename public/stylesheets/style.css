@@ -26,6 +26,7 @@ a {
   height: 20px;
   float: left;
   margin: 5px;
+  cursor: pointer;
 }
 
 .checked {
@@ -42,6 +43,7 @@ a {
   width:30px;
   height: 30px;
   margin-top: 10px;
+  cursor: pointer;
 }
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
