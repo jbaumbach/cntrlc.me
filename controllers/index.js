@@ -13,7 +13,7 @@ exports.requireHTTPS = function(req, res, next) {
 
 exports.index = function(req, res){
   res.render('index', { 
-    title: 'Controlc.me', 
+    title: 'cntrlc.me', 
     host: GLOBAL.SocketIO.Config.get('host'),
     FBAppId: GLOBAL.SocketIO.Config.get('Facebook:app_id')
   });
