@@ -1,14 +1,30 @@
-socketio-chat
-=============
+cntrlc.me
+=========
 
-Demo of Socket IO Chat app running on Heroku.  Load the page on two or more computers and everyone's messages should
-be appear in the chat area.
+The simple demo solves a common problem.  What do you do when you have a link on your phone and want to put it on your 
+computer, or vice versa?  Usually I email it to myself, but that's a bit of a hassle.  With cntrlc.me, 
+you just open the site in a browser on both devices and copy the link in.  The link instantly appears on the other device.
 
-Live demo: [http://socketio-chat.herokuapp.com/](http://socketio-chat.herokuapp.com/)
+Facebook login makes security quick and easy, and no Facebook permissions are asked for.
+
+This demo shows implementations of these technologies:
+
+* Node.js / Express 4 backend
+* Angular.js frontend
+* Facebook Login
+* Redis database
+* Socket.io messaging
+* Mocha/Supertest tests
+
+
+![Demo Screenshot](screenshots/cntrlc-screenshot.png "Screenshot")
+
+
+Check out a live demo running on Heroku: [http://cntrlc.me](http://cntrlc.me)
 
 License
 -------
-Copyright (c) 2011-2013 John Baumbach <john.j.baumbach@gmail.com>
+Copyright (c) 2015 John Baumbach <john.j.baumbach@gmail.com>
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
