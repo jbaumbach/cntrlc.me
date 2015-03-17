@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node app.js",
     "test": "mocha \"test/backend\" --recursive --reporter spec",
-    "gc": "cp ../socketio-chat-configs/* ./config"
+    "gc": "cp ../socketio-chat-configs/* ./config",
+    "sc": "cp ./config/*.json ../socketio-chat-configs"
   },
   "dependencies": {
     "async": "^0.9.0",
