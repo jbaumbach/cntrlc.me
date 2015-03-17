@@ -3,7 +3,8 @@ cntrlc.me
 
 The simple demo solves a common problem.  What do you do when you have a link on your phone and want to put it on your 
 computer, or vice versa?  Usually I email it to myself, but that's a bit of a hassle.  With cntrlc.me, 
-you just open the site in a browser on both devices and copy the link in.  The link instantly appears on the other device.
+you just open the site in a browser on both devices and copy the link in.  The link instantly appears on the other 
+device.  It works across any and all platforms and you don't need to install anything.
 
 Facebook login makes security quick and easy, and no Facebook permissions are asked for.
 
