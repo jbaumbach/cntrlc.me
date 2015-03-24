@@ -66,7 +66,7 @@ async.parallel({
     // Main site
     //
     server.listen(app.get('port'), function(){
-      debug('(info) Express server listening on port ' + app.get('port'));
+      console.log('(info) Express server listening on port ' + app.get('port'));
       cb();
     });
   },
@@ -81,11 +81,12 @@ async.parallel({
   }
 }, function(err, results) {
   if (err) {
-    debug('error starting up: ' + util.inspect(err));    
+    console.log('error starting up: ' + util.inspect(err));
+    process.exit(1);
   } else {
-    debug('*********************');
-    debug('** all systems go! **');
-    debug('*********************');
+    console.log('*********************');
+    console.log('** all systems go! **');
+    console.log('*********************');
   }
 });
 
