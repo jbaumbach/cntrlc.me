@@ -2,3 +2,4 @@ node_modules
 .idea*
 config/*.json
 .DS_Store
+*.log
