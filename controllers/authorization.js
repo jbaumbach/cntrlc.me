@@ -6,7 +6,7 @@ var async = require('async')
   , globalFunctions = require(process.cwd() + '/lib/global-functions')
   , socket = require(process.cwd() + '/lib/socket')
   , _ = require('underscore')
-;  
+  ;
 
 //
 // Here's what a sample response from FB looks like
@@ -35,7 +35,7 @@ var sampleFBBody = {
 
 exports.loginFb = function(req, res) {
   // console.log('got body data: ' + util.inspect(req.body));
-  
+
   var userId = 'user:fbid:' + req.body.info.id;
 
   /*
@@ -50,54 +50,54 @@ exports.loginFb = function(req, res) {
    "UserItems" = Redis List (rpush/lrange) with id = global_user_id and values are the item
 
    (consider making these "Models")
-    
+
    Architecture - idea #1:
-  
-  
-  1. Take the posted FB response and call FB to validate it.
-  
-  see: https://developers.facebook.com/docs/facebook-login/login-flow-for-web/#confirm
-  then: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.2#checktoken
-  
-  Basically, 
+
+
+   1. Take the posted FB response and call FB to validate it.
+
+   see: https://developers.facebook.com/docs/facebook-login/login-flow-for-web/#confirm
+   then: https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.2#checktoken
+
+   Basically, 
 
    make a call to:
 
    GET graph.facebook.com/debug_token?
    input_token={token-to-inspect}
    &access_token={app-token-or-admin-token}
-   
+
    the "input_token" is FBAuthResponse.accessToken
    the "app-token" is this:
-   
+
    "There is another method to make calls to the Graph API that doesn't require using a generated app 
    token. You can just pass your app id and app secret as the access_token parameter when you make a 
    call":
 
    http://graph.facebook.com/endpoint?key=value&access_token=app_id|app_secret"
-   
-   
-  2. If FB validates the request (comparing user info?), then we can log the user in.
-  
-  Look up FB user id in Redis.  If it does not exist, store user info.
-
-  3. Create session by inserting table(s).  Pass session id back to client
-  
-  4. Client passes session id with every Websocket post (no! they're automatically subscribed to the correct room)
-  
-  5. Websockets use session id as unique room key / id  (yes!)
-  
-  6. After login, all "UserItems" passed back to client for display in order
 
 
-  */
-  
+   2. If FB validates the request (comparing user info?), then we can log the user in.
+
+   Look up FB user id in Redis.  If it does not exist, store user info.
+
+   3. Create session by inserting table(s).  Pass session id back to client
+
+   4. Client passes session id with every Websocket post (no! they're automatically subscribed to the correct room)
+
+   5. Websockets use session id as unique room key / id  (yes!)
+
+   6. After login, all "UserItems" passed back to client for display in order
+
+
+   */
+
   async.waterfall([
     function confirmIdentity(cb) {
-      
+
       var fbAppId = GLOBAL.SocketIO.Config.get('Facebook:app_id');
       var fbAppSecret = GLOBAL.SocketIO.Config.get('Facebook:app_secret');
-      
+
       //
       // If either of these happen, ensure you have the values from FB's admin page set in your config file.
       //
@@ -106,16 +106,16 @@ exports.loginFb = function(req, res) {
       } else if (!fbAppSecret) {
         return cb({status:500, msg: 'Missing FB app secret'});
       }
-      
+
       var options = {
         secure: true,
         url: 'https://graph.facebook.com/debug_token?input_token=' + req.body.FBAuthResponse.accessToken +
-          '&access_token=' + fbAppId + '|' + fbAppSecret,
+        '&access_token=' + fbAppId + '|' + fbAppSecret,
         method: 'GET'
       };
-      
+
       // console.log('calling FB, going to use options: ' + util.inspect(options));
-      
+
       tinyHttp.executeCall(options, function(err, result) {
         if (err || !result) {
           cb({status: 502, msg: 'Unable to validate FB access token'});
@@ -123,7 +123,7 @@ exports.loginFb = function(req, res) {
           cb({status: 502, msg: 'Error from FB: ' + util.inspect(result.error)});
         } else {
           console.log('got result: ' + util.inspect(result));
-          
+
           if (req.body.FBAuthResponse.userID === result.data.user_id) {
             cb();
           } else {
@@ -133,7 +133,7 @@ exports.loginFb = function(req, res) {
       });
     },
     function doSessionConfig(cb) {
-      
+
       var redisClient = redis.getClient();
       var userItemsKey = 'useritems:' + userId;
 
@@ -152,11 +152,11 @@ exports.loginFb = function(req, res) {
           console.log('looking up userSessionKey: ' + userSessionKey);
           redisClient.get(userSessionKey, function(err, response) {
             if (response) {
-              console.log('found session, returning session id: ' + response);
+              console.log('found session!');
               cb(null, response, true);
             } else {
-              var sessionId = globalFunctions.generateUUID(); 
-              console.log('no session, setting one to: ' + sessionId);
+              var sessionId = globalFunctions.generateUUID();
+              console.log('no session, setting one');
               redisClient.set(userSessionKey, sessionId, function(err) {
                 cb(err, sessionId, false);
               });
@@ -182,7 +182,7 @@ exports.loginFb = function(req, res) {
           // This is called when data is posted to the room
           //
           var storageFunc = function(data, cb) {
-            
+
             //
             // zadd format: key, score, value
             //
@@ -199,7 +199,7 @@ exports.loginFb = function(req, res) {
             console.log('deleting id: ' + id);
             redisClient.zremrangebyscore(userItemsKey, score, score, cb);
           };
-          
+
           //
           // Create (or recycle!) a socket.namespace, and set the above function to be called whenever we get data
           //
@@ -214,10 +214,10 @@ exports.loginFb = function(req, res) {
       console.log('got err: ' + util.inspect(err));
       res.status(500).send({msg: util.inspect(err)});
     } else {
-      console.log('done with everything, returning session id: ' + util.inspect(sessionId));
+      console.log('done with everything, returning session id');
       res.status(200).send({sessionId: sessionId});
     }
 
   })
-  
+
 };
