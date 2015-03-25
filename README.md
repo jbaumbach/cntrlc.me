@@ -8,7 +8,7 @@ device.  It works across any and all platforms and you don't need to install any
 
 Facebook login makes security quick and easy, and no Facebook permissions are asked for.
 
-This demo shows implementations of a "REAN" stack:
+This demo shows an implementation of a "REAN" stack:
 
 * Redis database
 * Express 4 backend
