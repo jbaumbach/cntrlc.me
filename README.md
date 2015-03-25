@@ -8,12 +8,16 @@ device.  It works across any and all platforms and you don't need to install any
 
 Facebook login makes security quick and easy, and no Facebook permissions are asked for.
 
-This demo shows implementations of these technologies:
+This demo shows implementations of a "REAN" stack:
 
-* Node.js / Express 4 backend
-* Angular.js frontend
-* Facebook Login
 * Redis database
+* Express 4 backend
+* Angular.js frontend
+* Node.js
+
+With some bonus features:
+
+* Facebook Login
 * Socket.io messaging
 * Mocha/Supertest tests
 
