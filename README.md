@@ -17,10 +17,10 @@ This demo shows an implementation of a "REAN" stack:
 
 With some bonus features:
 
-* Facebook Login
-* Socket.io messaging
-* Mocha/Supertest tests
-
+* Example of Facebook Login within an Angular architecture
+* Example of Socket.io messaging
+* Example of Mocha/Supertest tests
+* Example of how to mock Redis with Sinon
 
 ![Demo Screenshot](screenshots/cntrlc-screenshot.png "Screenshot")
 

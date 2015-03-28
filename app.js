@@ -19,6 +19,10 @@ var express = require('express')
 ;
 
 //
+// Node Server startup
+//
+
+//
 // Export the express app, mainly for use in tests
 //
 exports.app = app;
@@ -84,6 +88,7 @@ async.parallel({
     console.log('error starting up: ' + util.inspect(err));
     process.exit(1);
   } else {
+    console.log('to see debug messages in console, set environment variable: $ DEBUG=sit:* nodemon app.js\n');
     console.log('*********************');
     console.log('** all systems go! **');
     console.log('*********************');
