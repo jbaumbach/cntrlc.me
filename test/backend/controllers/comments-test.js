@@ -4,7 +4,7 @@ var assert = require('assert')
   , assert = require('assert')
   , sinon = require('sinon')
   , redis = require(process.cwd() + '/lib/redis')
-  , debug = require('debug')('sid:test')
+  , debug = require('debug')('sit:test')
   , util = require('util')
 ;
 
@@ -32,6 +32,14 @@ describe('comments controller', function() {
             } else {
               cb(null, null);
             }
+          },
+          hgetall: function(key, cb) {
+            debug('(mock) redis call to hgetall with key: ' + util.inspect(key));
+            cb(null, { notrealobject: { first: 'Luke', last: 'Skywalker'}});
+          },
+          zrevrange: function(args, cb) {
+            debug('(mock) redis call to zrevrange with args: ' + util.inspect(args));
+            cb(null, []);
           }
         };
       });
