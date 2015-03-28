@@ -88,7 +88,8 @@ async.parallel({
     console.log('error starting up: ' + util.inspect(err));
     process.exit(1);
   } else {
-    console.log('to see debug messages in console, set environment variable: $ DEBUG=sit:* nodemon app.js\n');
+    console.log('> to see debug messages in console, set environment variable: $ DEBUG=sit:* nodemon app.js');
+    console.log('> to see debug messages on the front end console, set frontEndDebug in the environment config file');
     console.log('*********************');
     console.log('** all systems go! **');
     console.log('*********************');

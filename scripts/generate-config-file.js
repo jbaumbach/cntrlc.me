@@ -30,6 +30,7 @@ nconf.argv()
 // Set a few variables on `nconf`.
 //
 nconf.set('Facebook:app_id', '[your_app_id_here]');
+nconf.set('frontEndDebug', true);
 
 //
 // Get the entire database object from nconf. This will output

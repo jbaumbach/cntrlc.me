@@ -15,6 +15,7 @@ exports.index = function(req, res){
   res.render('index', { 
     title: 'cntrlc.me', 
     host: GLOBAL.SocketIO.Config.get('host'),
-    FBAppId: GLOBAL.SocketIO.Config.get('Facebook:app_id')
+    FBAppId: GLOBAL.SocketIO.Config.get('Facebook:app_id'),
+    debug: GLOBAL.SocketIO.Config.get('frontEndDebug') || false
   });
 };

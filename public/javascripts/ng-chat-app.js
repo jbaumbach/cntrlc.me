@@ -4,13 +4,12 @@
 
 var chatApp = angular.module('chatApp', ['ngResource']);
 var checkLoginState;      // Required by FB SDK - ensure it's in scope at all times
-var DEBUG = true;        // set to "true" to enable console logging (development only)
 
 //
 // Write to the console if we have one and debug is TRUE.
 //
 function log(items) {
-  if (DEBUG && console.log) {
+  if (environment.debug && console.log) {
     console.log(Array.prototype.slice.call(arguments));
   }
 }
@@ -20,7 +19,7 @@ function log(items) {
 //
 chatApp.service('Authorization', ['$http', function($http) {
   this.setSessionId = function(sessionId) {
-    DEBUG && console.log('setting Bearer token to header: ', sessionId);
+    log('setting Bearer token to header: ', sessionId);
     //
     // Set session ID in $http headers for all future requests
     //
