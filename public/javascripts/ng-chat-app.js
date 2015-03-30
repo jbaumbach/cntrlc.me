@@ -217,6 +217,7 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       setPageState(state);
     };
     
+    // not working in case of login then see about screen
     $scope.restoreMainPage = function() {
       setPageState($scope.mainPageState || 'showHomepage');
     };
