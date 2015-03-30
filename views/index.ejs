@@ -30,7 +30,7 @@
           </button>
           <a class="navbar-brand" href="#">cntrlc.me</a>
         </div>
-        <div class="collapse navbar-collapse">
+        <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <!--<li class="active"><a href="#">Home</a></li>-->
             <!--<li><a href="#about">About</a></li>-->
@@ -41,6 +41,8 @@
     </div>
 
     <div class="container">
+      <p></p>
+
       <div ng-cloak ng-show="pageState == 'showHomepage'">
         <h1>Your Secure Personal Clipboard</h1>
         <p><b>Quickly</b> and <b>securely</b> share your text and links between all your devices without installing 
@@ -56,12 +58,17 @@
         </div>
       </div>
 
+      <div ng-cloak ng-show="connectionStatus == 'error'" class="panel panel-danger">
+        <div class="panel-heading">
+          <h2 class="panel-title">Oops! There's some trouble connecting to the server. Retrying...</h2>
+        </div>
+      </div>
+      
       <div class="checkingLoggedIn" ng-cloak ng-show="pageState == 'checkingLoggedIn'">
         <h2>Loading... <img class="spinner" src="/images/spinner.gif"></h2>
       </div>
       
       <div ng-cloak ng-show="pageState == 'isLoggedIn'">
-        <p></p>
         <form role="form">
           <div class="form-group">
             <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter text/url" ng-model="comment">

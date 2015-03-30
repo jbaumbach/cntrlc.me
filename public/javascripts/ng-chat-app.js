@@ -193,22 +193,27 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
   function($scope, Comment, User, GlobalFunctions) {
     
     //
-    // todo: Understand why these coding gymnastics are required
+    // todo: Understand why these coding gymnastics are required - Angular is usually not this finicky 
     //
-    function setPageState(state) {
+
+    function setScopeVar(scopeVar, state) {
       if(!$scope.$$phase) {
         $scope.$apply(function() {
-          $scope.pageState = state;
+          $scope[scopeVar] = state;
         })
       } else {
         setTimeout(function() {
-          setPageState(state);
+          setScopeVar(scopeVar, state);
         }, 100);
       }
     }
     
+    function setPageState(state) {
+      setScopeVar('pageState', state);
+    }
+    
     //
-    // Listen fo broadcasted events from any other module 
+    // Listen for broadcasted events from any other module 
     // (e.g. FB module)
     //
     $scope.$on('pageState', function(event, state) {
@@ -270,14 +275,21 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
         }, 100);
       }
     };
-    
+
     function setUpSocket() {
       //
       // Connect a socket to the server
       //
+      $scope.connectionStatus = "pending";
+      
       var namespaceId = environment.host + '/' + User.sessionId;
+      var ioMangagerOptions = {
+        reconnectionDelay: 1000,        // increase delay by 1 second each attempt
+        reconnectionDelayMax: 30000     // max wait time 30 seconds
+      };
+      
       log('connecting to NS: ' + namespaceId);
-      var socket = io.connect(namespaceId);
+      var socket = io.connect(namespaceId, ioMangagerOptions);
       
       // 
       // If we get a response, let's add it to the comments list
@@ -293,6 +305,31 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       socket.on('deletedComment', function(id) {
         deleteCommentById(id);
       });
+
+      // todo: set UI elements based on status
+      
+      socket.on('connect', function() {
+        log('got connect!');
+        setScopeVar('connectionStatus', 'ok');
+      });
+      
+      socket.on('reconnect', function(data) {
+        log('got reconnect: ', data);
+        setScopeVar('connectionStatus', 'restored');
+        setTimeout(function() {
+          setScopeVar('connectionStatus', 'ok');
+        }, 4000);
+      });
+      
+      socket.on('connect_error', function(err) {
+        log('got connect_error error: ', err);
+        // $scope.connectionStatus = "error";
+        setScopeVar('connectionStatus', 'error');
+      });
+      
+      //socket.on('reconnect_error', function(err) {
+      //  log('got reconnect_error error: ', err);
+      //});
       
       //
       // The user has submitted a new comment
