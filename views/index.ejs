@@ -10,7 +10,7 @@
       var environment = {
         host: "<%= locals.host %>",
         FBAppId: "<%= locals.FBAppId %>",
-        debug: <%= locals.debug %>
+        debug: <%= locals.debugOutput %>
       }
     </script>
     <!-- Make responsive on iPhone/mobile -->
@@ -19,27 +19,36 @@
 
   <body ng-controller="chatCtrl">
     
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">cntrlc.me</a>
+    <header class="navbar navbar-default navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-3" ng-click="isCollapsed = !isCollapsed">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand visible-xs" href="#" ng-click="restoreMainPage()">cntrlc.me</a>
+          </div>
+          <nav class="hidden-xs">
+            <ul class="nav navbar-nav">
+              <a href="#top" ng-click="restoreMainPage()" role="button" class="navbar-brand">
+                cntrlc.me
+              </a>
+              <li><a href="#" ng-click="pageState = 'about'">About</a></li>
+            </ul>
+          </nav>
+          <nav class="visible-xs" collapse="!isCollapsed">
+            <ul class="nav navbar-nav">
+              <li><a href="#" ng-click="isCollapsed = !isCollapsed; setAuxPage('about')">About</a></li>
+            </ul>
+          </nav>
         </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <!--<li class="active"><a href="#">Home</a></li>-->
-            <!--<li><a href="#about">About</a></li>-->
-            <!--<li><a href="#contact">Contact</a></li>-->
-          </ul>
-        </div><!--/.nav-collapse -->
       </div>
-    </div>
+    </header>
 
+    
     <div class="container">
       <p></p>
 
@@ -94,9 +103,21 @@
           <div class="delete-button" ng-click="deleteSelected()"></div>
         </div>
       </div>
+
+      <div ng-cloak ng-show="pageState == 'about'">
+        <h2>About cntrlc.me</h2>
+        <p>This page is open sourced and based on the "REAN" stack. (R)edis, (E)xpress, (A)ngular, (N)ode.</p>
+        
+        <p>Check it out on github: <a href=""></a></p>
+      </div>
+
+
+
+
+
+
+
     </div><!-- /.container -->
-  
-  
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

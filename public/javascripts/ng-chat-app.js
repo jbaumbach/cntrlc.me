@@ -2,7 +2,7 @@
 // Front end Angular application
 //
 
-var chatApp = angular.module('chatApp', ['ngResource']);
+var chatApp = angular.module('chatApp', ['ngResource','ui.bootstrap']);
 var checkLoginState;      // Required by FB SDK - ensure it's in scope at all times
 
 //
@@ -211,6 +211,15 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     function setPageState(state) {
       setScopeVar('pageState', state);
     }
+
+    $scope.setAuxPage = function(state) {
+      $scope.mainPageState = $scope.pageState;
+      setPageState(state);
+    };
+    
+    $scope.restoreMainPage = function() {
+      setPageState($scope.mainPageState || 'showHomepage');
+    };
     
     //
     // Listen for broadcasted events from any other module 
