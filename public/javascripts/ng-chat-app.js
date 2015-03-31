@@ -6,7 +6,7 @@ var chatApp = angular.module('chatApp', ['ngResource','ui.bootstrap']);
 var checkLoginState;      // Required by FB SDK - ensure it's in scope at all times
 
 //
-// Write to the console if we have one and debug is TRUE.
+// Write to the console (if we have one) and debug is TRUE.
 //
 function log(items) {
   if (environment.debug && console.log) {
@@ -213,13 +213,13 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     }
 
     $scope.setAuxPage = function(state) {
-      $scope.mainPageState = $scope.pageState;
+      $scope.mainPageState = $scope.mainPageState || $scope.pageState;
       setPageState(state);
     };
     
-    // not working in case of login then see about screen
     $scope.restoreMainPage = function() {
       setPageState($scope.mainPageState || 'showHomepage');
+      $scope.mainPageState = null;
     };
     
     //
@@ -359,7 +359,7 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
         };
   
         //
-        // Send the comment
+        // Send the comment to the server, and also respond locally
         //
         socket.emit('addComment', data);
   

@@ -36,7 +36,7 @@
               <a href="#top" ng-click="restoreMainPage()" role="button" class="navbar-brand">
                 cntrlc.me
               </a>
-              <li><a href="#" ng-click="pageState = 'about'">About</a></li>
+              <li><a href="#" ng-click="setAuxPage('about')">About</a></li>
             </ul>
           </nav>
           <nav class="visible-xs" collapse="!isCollapsed">
@@ -45,12 +45,25 @@
             </ul>
           </nav>
         </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <!--<li class="active"><a href="#">Home</a></li>-->
+            <!--<li><a href="#about">About</a></li>-->
+            <!--<li><a href="#contact">Contact</a></li>-->
+          </ul>
+        </div><!--/.nav-collapse -->
       </div>
     </header>
 
     
     <div class="container">
       <p></p>
+
+      <div ng-cloak ng-show="connectionStatus == 'error'" class="panel panel-danger">
+        <div class="panel-heading">
+          <h2 class="panel-title">Oops! Lost connection to the server. Retrying...</h2>
+        </div>
+      </div>
 
       <div ng-cloak ng-show="pageState == 'showHomepage'">
         <h1>Your Secure Personal Clipboard</h1>
@@ -67,12 +80,6 @@
         </div>
       </div>
 
-      <div ng-cloak ng-show="connectionStatus == 'error'" class="panel panel-danger">
-        <div class="panel-heading">
-          <h2 class="panel-title">Oops! There's some trouble connecting to the server. Retrying...</h2>
-        </div>
-      </div>
-      
       <div class="checkingLoggedIn" ng-cloak ng-show="pageState == 'checkingLoggedIn'">
         <h2>Loading... <img class="spinner" src="/images/spinner.gif"></h2>
       </div>
@@ -140,12 +147,26 @@
         </div>
 
         <p class="clearfix"></p>
-        <p>With some other essential technology:</p>
+        <p>With help from some other essential technology:</p>
 
         <div class="thumbnail-item">
           <a href="http://socket.io/">
           <img src="/images/socketio.gif">
           <p>socket.io</p>
+          </a>
+        </div>
+        
+        <div class="thumbnail-item">
+          <a href="http://getbootstrap.com">
+          <img src="/images/bootstrap.png">
+          <p>Bootstap CSS</p>
+          </a>
+        </div>
+        
+        <div class="thumbnail-item">
+          <a href="http://angular-ui.github.io/bootstrap/">
+          <img src="/images/bootstrap.png">
+          <p>UI Bootstap (Angular)</p>
           </a>
         </div>
         
@@ -156,8 +177,15 @@
           </a>
         </div>
         
+        <div class="thumbnail-item">
+          <a href="http://mochajs.org/">
+          <img src="/images/mocha.png">
+          <p>Mocha</p>
+          </a>
+        </div>
+        
         <p class="clearfix"></p>
-        <p>Check it out on github: <a href=""></a></p>
+        <p>Check out cntrlc.me on github: <a href=""></a></p>
 
         <div class="thumbnail-item">
           <a href="https://github.com/jbaumbach/cntrlc.me">
