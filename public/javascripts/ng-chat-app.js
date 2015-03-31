@@ -198,6 +198,7 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     function setScopeVar(scopeVar, state) {
       if(!$scope.$$phase) {
         $scope.$apply(function() {
+          log('Setting $scope["' + scopeVar + '"] to ' + state);
           $scope[scopeVar] = state;
         })
       } else {
@@ -212,7 +213,7 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     }
 
     //
-    // Slightly hacky "about" page support
+    // Slightly hacky "about" page support.  Todo: use full Angular routing
     //
     $scope.setAuxPage = function(state) {
       $scope.mainPageState = $scope.mainPageState || $scope.pageState;
@@ -220,8 +221,9 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     };
     
     $scope.restoreMainPage = function() {
-      setPageState($scope.mainPageState || 'showHomepage');
-      $scope.mainPageState = null;
+      if ($scope.mainPageState) {
+        setPageState($scope.mainPageState);
+      }
     };
     
     //
