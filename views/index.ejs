@@ -37,27 +37,21 @@
                 cntrlc.me
               </a>
               <li><a href="#" ng-click="setAuxPage('about')">About</a></li>
+              <li><a href="#" ng-click="logout()">Logout</a></li>
             </ul>
           </nav>
           <nav class="visible-xs" collapse="!isCollapsed">
             <ul class="nav navbar-nav">
               <li><a href="#" ng-click="isCollapsed = !isCollapsed; setAuxPage('about')">About</a></li>
+              <li><a href="#" ng-click="isCollapsed = !isCollapsed; logout()">Logout</a></li>
             </ul>
           </nav>
         </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <!--<li class="active"><a href="#">Home</a></li>-->
-            <!--<li><a href="#about">About</a></li>-->
-            <!--<li><a href="#contact">Contact</a></li>-->
-          </ul>
-        </div><!--/.nav-collapse -->
       </div>
     </header>
-
     
     <div class="container">
-      <p></p>
+      <p class="spacer"></p>
 
       <div ng-cloak ng-show="connectionStatus == 'error'" class="panel panel-danger">
         <div class="panel-heading">
@@ -147,7 +141,7 @@
         </div>
 
         <p class="clearfix"></p>
-        <p>With help from some other essential technology:</p>
+        <p class="description">With help from some other essential technology:</p>
 
         <div class="thumbnail-item">
           <a href="http://socket.io/">
@@ -171,21 +165,21 @@
         </div>
         
         <div class="thumbnail-item">
-          <a href="http://heroku.com">
-          <img src="/images/heroku.png">
-          <p>Heroku</p>
-          </a>
-        </div>
-        
-        <div class="thumbnail-item">
           <a href="http://mochajs.org/">
           <img src="/images/mocha.png">
           <p>Mocha</p>
           </a>
         </div>
-        
+
+        <div class="thumbnail-item">
+          <a href="http://heroku.com">
+            <img src="/images/heroku.png">
+            <p>Heroku</p>
+          </a>
+        </div>
+
         <p class="clearfix"></p>
-        <p>Check out cntrlc.me on github: <a href=""></a></p>
+        <p class="description">Check out cntrlc.me on github:</p>
 
         <div class="thumbnail-item">
           <a href="https://github.com/jbaumbach/cntrlc.me">
@@ -194,6 +188,9 @@
           </a>
         </div>
 
+        <p class="clearfix"></p>
+        <h3><span class="label label-info">Protip</span></h3>
+        <p>Add a bookmark to this app to your devices' homescreen for quick access.</p>
       </div>
 
 

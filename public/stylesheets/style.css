@@ -160,11 +160,12 @@ section {
 
 /* cntrlc.me Specific Styles */
 
-body {
-}
-
 a {
   color: #00B7FF;
+}
+
+.spacer { 
+  margin: 25px 0;
 }
 
 #login-buttons {

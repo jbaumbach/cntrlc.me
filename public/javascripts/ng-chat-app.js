@@ -195,7 +195,6 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     //
     // todo: Understand why these coding gymnastics are required - Angular is usually not this finicky 
     //
-
     function setScopeVar(scopeVar, state) {
       if(!$scope.$$phase) {
         $scope.$apply(function() {
@@ -212,6 +211,9 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       setScopeVar('pageState', state);
     }
 
+    //
+    // Slightly hacky "about" page support
+    //
     $scope.setAuxPage = function(state) {
       $scope.mainPageState = $scope.mainPageState || $scope.pageState;
       setPageState(state);
@@ -221,6 +223,16 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
       setPageState($scope.mainPageState || 'showHomepage');
       $scope.mainPageState = null;
     };
+    
+    //
+    // Log out - from FB too!
+    //
+    $scope.logout = function() {
+      log('calling main FB logout');
+      FB.logout(function(response) {
+        setPageState('showHomepage');
+      });
+    }
     
     //
     // Listen for broadcasted events from any other module 
