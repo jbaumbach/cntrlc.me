@@ -31,6 +31,7 @@ nconf.argv()
 //
 nconf.set('Facebook:app_id', '[your_app_id_here]');
 nconf.set('frontEndDebug', true);
+nconf.set("googleAnalyticsCookieDomain", { "cookieDomain": "none" });     // This allows calls to GA for localhost - normally omit this
 
 //
 // Get the entire database object from nconf. This will output
