@@ -27,6 +27,24 @@ chatApp.service('Authorization', ['$http', function($http) {
   }    
 }]);
 
+chatApp.service('Analytics', function() {
+  this.pageView = function(page) {
+    log('[Analy] pageView: ' + page);
+    ga('send', {
+      'hitType': 'pageview',
+      'page': page
+    });
+  }
+  
+  this.siteEvent = function(name, category) {
+    log('[Analy] siteEvent: ' + name + ' : ' + category);
+    ga('send', 'event', {
+      'eventCategory': category || 'Misc',
+      'eventAction': name
+    });  
+  }
+});
+
 //
 // Utility functions
 //
@@ -73,8 +91,8 @@ chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization
 // App entry point.  Most code here is copied from the Facebook SDK sample
 // page, with some minor Angular-izing. 
 //
-chatApp.run(['$rootScope', '$window', 'User', '$http',
-  function($rootScope, $window, User, $http) {
+chatApp.run(['$rootScope', '$window', 'User', '$http', 'Analytics',
+  function($rootScope, $window, User, $http, Analytics) {
 
     function setPageState(state) {
       $rootScope.$broadcast('pageState', state);
@@ -105,6 +123,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
         // Logged into your app and Facebook.
         User.FBAuthResponse = response.authResponse;
         continueLogin();
+        Analytics.siteEvent('FBLogin');
       } else if (response.status === 'not_authorized') {
         // The person is logged into Facebook, but not your app.
         setPageState('showHomepage');
@@ -189,8 +208,8 @@ chatApp.run(['$rootScope', '$window', 'User', '$http',
 //
 // Angular controller for the main screen
 //
-chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
-  function($scope, Comment, User, GlobalFunctions) {
+chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 'Analytics', 
+  function($scope, Comment, User, GlobalFunctions, Analytics) {
     
     //
     // todo: Understand why these coding gymnastics are required - Angular is usually not this finicky 
@@ -216,12 +235,14 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions',
     // Slightly hacky "about" page support.  Todo: use full Angular routing
     //
     $scope.setAuxPage = function(state) {
+      Analytics.pageView('/' + state);
       $scope.mainPageState = $scope.mainPageState || $scope.pageState;
       setPageState(state);
     };
     
     $scope.restoreMainPage = function() {
       if ($scope.mainPageState) {
+        Analytics.pageView('/' + $scope.mainPageState);
         setPageState($scope.mainPageState);
       }
     };
