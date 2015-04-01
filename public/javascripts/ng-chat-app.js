@@ -30,19 +30,13 @@ chatApp.service('Authorization', ['$http', function($http) {
 chatApp.service('Analytics', function() {
   this.pageView = function(page) {
     log('[Analy] pageView: ' + page);
-    ga('send', {
-      'hitType': 'pageview',
-      'page': page
-    });
-  }
+    ga('send', 'pageview', page);
+  };
   
-  this.siteEvent = function(name, category) {
-    log('[Analy] siteEvent: ' + name + ' : ' + category);
-    ga('send', 'event', {
-      'eventCategory': category || 'Misc',
-      'eventAction': name
-    });  
-  }
+  this.siteEvent = function(category, action) {
+    log('[Analy] siteEvent: ' + category + ' : ' + action);
+    ga('send', 'event', category, action); 
+  };
 });
 
 //
@@ -123,7 +117,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http', 'Analytics',
         // Logged into your app and Facebook.
         User.FBAuthResponse = response.authResponse;
         continueLogin();
-        Analytics.siteEvent('FBLogin');
+        Analytics.siteEvent('authentication', 'FB-login');
       } else if (response.status === 'not_authorized') {
         // The person is logged into Facebook, but not your app.
         setPageState('showHomepage');
@@ -232,7 +226,7 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
     }
 
     //
-    // Slightly hacky "about" page support.  Todo: use full Angular routing
+    // Hacky "about" page support.  Todo: use full Angular routing
     //
     $scope.setAuxPage = function(state) {
       Analytics.pageView('/' + state);
@@ -252,7 +246,9 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
     //
     $scope.logout = function() {
       log('calling main FB logout');
+      Analytics.siteEvent('authentication', 'logout');
       FB.logout(function(response) {
+        $scope.mainPageState = null;
         setPageState('showHomepage');
       });
     }
