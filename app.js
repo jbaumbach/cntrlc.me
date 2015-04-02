@@ -59,9 +59,9 @@ app.get('/api/v1/comments', commentsController.authenticateSession, commentsCont
 var server = http.createServer(app);
 
 //
-// Set up required application systems 
+// Set up required application systems.  Some systems require other systems to run first, so use async.auto.
 //
-async.parallel({
+async.auto({
   db: function(cb) {
     redis.connectToRedis(cb);
   },
@@ -74,15 +74,14 @@ async.parallel({
       cb();
     });
   },
-  sockets: function(cb) {
+  sockets: ['db', function(cb) {
     //
     // Socket listener.  Gets messages from the clients and rebroadcasts them
     // to all the other clients.
     //
-    var io = socket.start(server);
+    socket.start(server, cb);
     
-    cb(io ? null : 'cannot start socket server');
-  }
+  }]
 }, function(err, results) {
   if (err) {
     console.log('error starting up: ' + util.inspect(err));

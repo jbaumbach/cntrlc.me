@@ -1,5 +1,5 @@
 var nconf = require('nconf')
-  fs = require('fs')
+  , fs = require('fs')
   ;
 
 //
@@ -9,7 +9,8 @@ var nconf = require('nconf')
 //
 //  GLOBAL.SocketIO.Config.get('Facebook:app_id');
 //
-
+// nconf is cooler than you imagine.  see: https://github.com/indexzero/nconf
+//
 // Set a default env
 process.env.NODE_ENV = (process.env.NODE_ENV || "development");
 
@@ -23,8 +24,22 @@ if (!fs.existsSync(configFName)) {
 }
 
 console.log('(info) using config file: ' + configFName);
-GLOBAL.SocketIO.Config.argv()
+
+//
+// Setup nconf to use (in-order):
+//   1. Command-line arguments
+//   2. Environment variables
+//   3. A file located at 'path/to/config.json'
+//
+GLOBAL.SocketIO.Config
+  .argv()
   .env()
   .file({ file: configFName })
 ;
 
+//
+// Set all defaults here - use these if not found in any source above
+//
+nconf.defaults({
+  "REDISCLOUD_URL": "localhost:6379"
+});
