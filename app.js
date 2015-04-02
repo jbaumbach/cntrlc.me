@@ -63,7 +63,12 @@ var server = http.createServer(app);
 //
 async.auto({
   db: function(cb) {
-    redis.connectToRedis(cb);
+    redis.connectToRedis(function(err) {
+      if (err) {
+        err = 'Ensure redis is started and reachable!';
+      }
+      cb(err);
+    });
   },
   server: function(cb) {
     //
