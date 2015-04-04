@@ -94,6 +94,7 @@ async.auto({
   } else {
     console.log('> to see debug messages in console, set environment variable: $ DEBUG=sit:* nodemon app.js');
     console.log('> to see debug messages on the front end console, set frontEndDebug in the environment config file');
+    console.log('* current DEBUG env: ' + (process.env.DEBUG || '[none]'));
     console.log('*********************');
     console.log('** all systems go! **');
     console.log('*********************');
