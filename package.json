@@ -2,6 +2,14 @@
   "name": "cntrlc.me",
   "version": "0.0.3",
   "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbaumbach/cntrlc.me.git"
+  },
+  "engines": {
+    "node": "0.12.x",
+    "npm": "2.7.x"
+  },
   "scripts": {
     "start": "node app.js",
     "test": "mocha \"test/backend\" --recursive --reporter spec",
@@ -19,7 +27,6 @@
     "nconf": "~0.7.1",
     "redis": "^0.12.1",
     "serve-favicon": "~2.2.0",
-    "//": "Note: socket.io is loaded from this github fork until the pull request is merged into the main socket.io repo",
     "socket.io": "jbaumbach/socket.io",
     "underscore": "^1.8.2"
   },
