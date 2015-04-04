@@ -27,6 +27,9 @@ With some bonus features:
 
 Check out a live demo running on Heroku: [http://cntrlc.me](http://cntrlc.me)
 
+### Fun Facts
+socket.io [requires sticky sessions](https://github.com/Automattic/socket.io/issues/1598) when running on multiple servers.  Heroku doesn't support sticky sessions at the moment, so don't expect to scale up on that platform!
+
 License
 -------
 Copyright (c) 2015 John Baumbach <john.j.baumbach@gmail.com>
