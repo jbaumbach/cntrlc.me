@@ -69,8 +69,10 @@ async.parallel({
     //
     // Main site
     //
-    server.listen(app.get('port'), function(){
-      console.log('(info) Express server listening on port ' + app.get('port'));
+    var startupPort = app.get('port');
+    process.stdout.write('(info) Starting Express server on port ' + startupPort + '...');
+    server.listen(startupPort, function() {
+      console.log('done!');
       cb();
     });
   },
