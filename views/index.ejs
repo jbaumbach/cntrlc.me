@@ -75,18 +75,26 @@
         <p><b>Quickly</b> and <b>securely</b> share your text and links between all your devices without installing 
           any apps. Just go to <b>cntrlc.me</b> and paste in your text.  It'll appear instantly on any other logged in device.</p>
         <img class="home-image" src="/images/cntrlc-screenshot.png">
-        <p>Login to access your clipboard.  We don't ask for any additional Facebook permissions.</p>
-        <div id="login-buttons" style="alignment: auto">
-          <div id="fb-root"></div>
-          <fb:login-button scope="public_profile,email" size="large" onlogin="checkLoginState();">
-          </fb:login-button>
-          <div id="status">
+        <div ng-cloak ng-hide="missingFacebook">
+          <p>Login to access your clipboard.  We don't ask for any additional Facebook permissions.</p>
+          <div id="login-buttons" style="alignment: auto">
+            <div id="fb-root"></div>
+            <fb:login-button scope="public_profile,email" size="large" onlogin="checkLoginState();">
+            </fb:login-button>
+            <div id="status">
+            </div>
           </div>
+        </div>
+        <div ng-cloak ng-show="missingFacebook">
+          <div class="alert alert-warning" role="alert">
+            <strong>Hmmmmmm...</strong> Facebook components do not appear to have been loaded.
+          </div>
+          <p>To make login as fast and easy as possible for you, our cherished users, this site uses Facebook for authentication.  It doesn't appear like the "Login" button loaded ok.  If you're running any blockers such as <a href="http://www.ghostery.com" target="_blank">Ghostery</a>, you'll need to whitelist Facebook on this site!</p>
         </div>
       </div>
 
       <div class="checkingLoggedIn" ng-cloak ng-show="pageState == 'checkingLoggedIn'">
-        <h2>Loading... <img class="spinner" src="/images/spinner.gif"></h2>
+        <h2>Loading... {{ stillLoadingMessage }} <img class="spinner" src="/images/spinner.gif"></h2>
       </div>
       
       <div ng-cloak ng-show="pageState == 'isLoggedIn'">

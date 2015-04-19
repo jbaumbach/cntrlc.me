@@ -15,6 +15,38 @@ function log(items) {
 }
 
 //
+// Helper JS class implementing an expiring timer
+//
+var Meter = function(expiredFunc, progressFunc, options) {
+  var self = this;
+  this.blockerChecks = 0;
+  options = options || {};
+  this.log = options.log || function() {};
+  var interval = options.interval || 4000;
+  var timeoutIntervals = options.timeoutIntervals || 2;
+  this.blockerChecker = setInterval(function() {
+    self.blockerChecks++;
+    self.log('blocker check ' + self.blockerChecks);
+    if (self.blockerChecks < timeoutIntervals) {
+      if (typeof progressFunc === 'function') {
+        progressFunc(self.blockerChecks);
+      }
+    } else {
+      clearInterval(self.blockerChecker);
+      if (typeof expiredFunc === 'function') {
+        expiredFunc();
+      }
+    }
+  }, interval);
+};
+
+Meter.prototype.stop = function() {
+  this.log('stopping!');
+  clearInterval(this.blockerChecker);
+};
+
+
+//
 // Enable our bearer token (e.g. session id) to be sent on every $http request
 //
 chatApp.service('Authorization', ['$http', function($http) {
@@ -82,17 +114,35 @@ chatApp.factory('User', ['$http', 'Authorization', function($http, Authorization
 }]);
 
 //
+// Helper factory for managing FB being blocked by adblockers such as Ghostery
+//
+chatApp.factory('FBMeter', ['$rootScope', function($rootScope) {
+  var fbAdblockerMeter = new Meter(function expired() {
+    $rootScope.$broadcast('FBMeterExpired');
+  }, function progress(times) {
+    $rootScope.$broadcast('FBMeterProgress', times);
+  }, { log: log });
+
+  return {
+    stop: function () {
+      $rootScope.$broadcast('FBMeterStopped');
+      fbAdblockerMeter.stop();
+    }
+  }
+}]);
+
+//
 // App entry point.  Most code here is copied from the Facebook SDK sample
 // page, with some minor Angular-izing. 
 //
-chatApp.run(['$rootScope', '$window', 'User', '$http', 'Analytics',
-  function($rootScope, $window, User, $http, Analytics) {
+chatApp.run(['$rootScope', '$window', 'User', '$http', 'Analytics', 'FBMeter',
+  function($rootScope, $window, User, $http, Analytics, FBMeter) {
 
+    log('app started!');
+    
     function setPageState(state) {
       $rootScope.$broadcast('pageState', state);
     }
-
-    log('app started!');
 
     //
     // FB SDK stuff
@@ -100,12 +150,7 @@ chatApp.run(['$rootScope', '$window', 'User', '$http', 'Analytics',
     // This is called with the results from from FB.getLoginStatus().
     function statusChangeCallback(response) {
 
-      // todo: solve flashing messages issue in UI when user is already logged in (easy)
-      
-      //$rootScope.$apply(function() {
-      //  User.checkingLoggedIn = false;
-      //});
-
+      FBMeter.stop();
       log('statusChangeCallback');
       log(response);
       
@@ -268,6 +313,19 @@ chatApp.controller('chatCtrl', ['$scope', 'Comment', 'User', 'GlobalFunctions', 
       setPageState('isLoggedIn');
       getUserComments();
       setUpSocket();
+    });
+    
+    $scope.$on('FBMeterProgress', function() {
+      setScopeVar('stillLoadingMessage', 'almost there...');
+    });
+    
+    $scope.$on('FBMeterExpired', function() {
+      setScopeVar('missingFacebook', 'true');
+      setPageState('showHomepage');
+    });
+    
+    $scope.$on('FBMeterStopped', function() {
+      setScopeVar('missingFacebook', null);
     });
     
     $scope.comments = [];
